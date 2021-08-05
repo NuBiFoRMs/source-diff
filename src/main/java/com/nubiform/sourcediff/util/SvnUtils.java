@@ -58,6 +58,7 @@ public class SvnUtils {
 
         String output = outputStream.toString();
         log.debug("executed command: {}, result: {}", commandLine, output);
+        return output;
     }
 
     private static CommandLine getLinuxCommandLine(String command) {
