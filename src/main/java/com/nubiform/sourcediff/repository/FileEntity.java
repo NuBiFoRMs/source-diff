@@ -43,5 +43,5 @@ public class FileEntity {
 
     private LocalDateTime prodModified;
 
-    private LocalDateTime diffModified;
+    private LocalDateTime scanModified;
 }

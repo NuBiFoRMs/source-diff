@@ -20,12 +20,16 @@ public class AppProperties {
 
         private String name;
 
-        private String svnUsername;
-
-        private String svnPassword;
-
         private String devUrl;
 
+        private String devUsername;
+
+        private String devPassword;
+
         private String prodUrl;
+
+        private String prodUsername;
+
+        private String prodPassword;
     }
 }
