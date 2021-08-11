@@ -1,10 +1,12 @@
 package com.nubiform.sourcediff.controller;
 
 import com.nubiform.sourcediff.config.AppProperties;
+import com.nubiform.sourcediff.constant.DiffType;
 import com.nubiform.sourcediff.service.DiffService;
 import com.nubiform.sourcediff.service.DirectoryService;
 import com.nubiform.sourcediff.util.PathUtils;
 import com.nubiform.sourcediff.validator.RepositoryValidator;
+import com.nubiform.sourcediff.vo.DiffResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
@@ -17,6 +19,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.io.IOException;
+import java.util.List;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -86,8 +89,14 @@ public class DiffController {
 
         model.addAttribute("path", path);
         model.addAttribute("parentPath", directoryService.getParentPath(path));
-        model.addAttribute("diff", diffService.diff(path));
 
-        return "view";
+        List<DiffResponse> diffResponseList = diffService.diff(path);
+        model.addAttribute("diff", diffResponseList);
+
+        if (diffResponseList.stream()
+                .anyMatch(diffResponse -> !DiffType.EQUAL.equals(diffResponse.getChangeType())))
+            return "diff-view";
+        else
+            return "view";
     }
 }

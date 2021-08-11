@@ -2,7 +2,7 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head th:replace="fragments.html :: head"></head>
 <body>
-<div th:replace="fragments.html :: nav"></div>
+<div th:replace="fragments.html :: nav-main"></div>
 
 <div class="container">
     <div class="mt-5 mb-5">
@@ -10,9 +10,14 @@
 
             <div class="list-group-item">
                 <h5 class="mt-2">
-                    <div th:each="path : ${parentPath}" th:remove="tag">
-                        <a th:href="@{/explorer{path}(path=${path.filePath})}">
-                            <div th:text="${path.fileName}" th:remove="tag">path.fileName</div></a> /
+                    <div th:each="eachPath : ${parentPath}" th:remove="tag">
+                        <div th:if="${!path.equals(eachPath.filePath)}" th:remove="tag">
+                            <a th:href="@{/explorer{path}(path=${eachPath.filePath})}">
+                                <div th:text="${eachPath.fileName}" th:remove="tag">eachPath.fileName</div></a> /
+                        </div>
+                        <div th:if="${path.equals(eachPath.filePath)}" th:remove="tag">
+                            <div th:text="${eachPath.fileName}" th:remove="tag">eachPath.fileName</div></a> /
+                        </div>
                     </div>
                 </h5>
             </div>
