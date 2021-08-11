@@ -50,8 +50,8 @@ public class ScanService {
     public void scan(AppProperties.RepositoryProperties repositoryProperties) {
         log.info("start scan: {}", repositoryProperties.getName());
 
-        File devPath = new File(repositoryProperties.getName() + "/" + SourceType.DEV);
-        File prodPath = new File(repositoryProperties.getName() + "/" + SourceType.PROD);
+        File devPath = new File(repositoryProperties.getName() + PathUtils.SEPARATOR + SourceType.DEV);
+        File prodPath = new File(repositoryProperties.getName() + PathUtils.SEPARATOR + SourceType.PROD);
 
         log.debug("svn checkout");
         svnConnector.checkout(repositoryProperties.getDevUrl(), "HEAD", devPath, repositoryProperties.getDevUsername(), repositoryProperties.getDevPassword());
@@ -62,7 +62,7 @@ public class ScanService {
         directoryScan(repositoryProperties.getName(), SourceType.PROD, prodPath);
 
         log.debug("scan init diff");
-        diffScan("/" + repositoryProperties.getName());
+        diffScan(PathUtils.SEPARATOR + repositoryProperties.getName());
 
         log.info("finish scan: {}", repositoryProperties.getName());
     }
@@ -76,7 +76,7 @@ public class ScanService {
         String path = baseDirectory.getPath();
         String keyPath = PathUtils.removePrefix(path, rootDirectory);
         path = PathUtils.replaceSeparator(path);
-        keyPath = "/" + repository + PathUtils.replaceSeparator(keyPath);
+        keyPath = PathUtils.SEPARATOR + repository + PathUtils.replaceSeparator(keyPath);
 
         FileEntity fileEntity = fileRepository.findByFilePath(keyPath)
                 .orElse(FileEntity.builder()
