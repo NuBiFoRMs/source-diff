@@ -1,6 +1,7 @@
 package com.nubiform.sourcediff.controller;
 
 import com.nubiform.sourcediff.config.AppProperties;
+import com.nubiform.sourcediff.service.DiffService;
 import com.nubiform.sourcediff.service.DirectoryService;
 import com.nubiform.sourcediff.util.PathUtils;
 import com.nubiform.sourcediff.validator.RepositoryValidator;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
+import java.io.IOException;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -33,6 +35,8 @@ public class DiffController {
     private final RepositoryValidator repositoryValidator;
 
     private final DirectoryService directoryService;
+
+    private final DiffService diffService;
 
     @InitBinder("repository")
     protected void repositoryBinder(WebDataBinder webDataBinder) {
@@ -76,9 +80,13 @@ public class DiffController {
     }
 
     @GetMapping(VIEW_URI + REPOSITORY_PATH + ANT_PATTERN)
-    public String view(@PathVariable @Valid String repository, Model model, HttpServletRequest request) {
+    public String view(@PathVariable @Valid String repository, Model model, HttpServletRequest request) throws IOException {
         String path = PathUtils.removePrefix(request.getRequestURI(), VIEW_URI);
         log.info("request: {}, repository: {}, path: {}", VIEW_URI, repository, path);
+
+        model.addAttribute("path", path);
+        model.addAttribute("parentPath", directoryService.getParentPath(path));
+        model.addAttribute("diff", diffService.diff(path));
 
         return "view";
     }

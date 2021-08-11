@@ -41,7 +41,7 @@
                 </div>
 
                 <div th:if="${#strings.equals(file.fileType, 'F')}" th:remove="tag">
-                    <a class="list-group-item list-group-item-action" href="#">
+                    <a class="list-group-item list-group-item-action" th:href="@{/view{path}(path=${file.filePath})}">
                         <div class="d-flex align-items-center justify-content-between">
                             <div class="d-flex align-items-center">
                                 <div class="d-flex justify-content-center" style="width:2.2rem;font-size: 1.5rem">

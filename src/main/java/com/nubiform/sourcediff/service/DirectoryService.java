@@ -39,7 +39,7 @@ public class DirectoryService {
     public List<FileResponse> getParentPath(String path) {
         List<FileEntity> fileList = new ArrayList<>();
 
-        FileEntity fileEntity = fileRepository.findByFilePathAndFileType(path, FileType.DIRECTORY)
+        FileEntity fileEntity = fileRepository.findByFilePath(path)
                 .orElseThrow(RuntimeException::new);
         fileList.add(fileEntity);
 
