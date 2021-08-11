@@ -15,16 +15,14 @@ public class FileFilter implements FilenameFilter {
 
     @Override
     public boolean accept(File dir, String name) {
-        name = StringUtils.lowerCase(name);
-
         for (String value : fileFilterProperties.getPrefix())
-            if (StringUtils.startsWith(name, value)) return false;
+            if (StringUtils.startsWithIgnoreCase(name, value)) return false;
 
         for (String value : fileFilterProperties.getPostfix())
-            if (StringUtils.endsWith(name, value)) return false;
+            if (StringUtils.endsWithIgnoreCase(name, value)) return false;
 
         for (String value : fileFilterProperties.getContains())
-            if (StringUtils.contains(name, value)) return false;
+            if (StringUtils.containsIgnoreCase(name, value)) return false;
 
         return true;
     }
