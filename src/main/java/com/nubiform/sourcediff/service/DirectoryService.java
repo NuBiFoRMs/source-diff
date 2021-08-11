@@ -81,7 +81,8 @@ public class DirectoryService {
                 .stream()
                 .collect(Collectors.groupingBy(FileEntity::getFileType, Collectors.counting()));
 
-        while (count.get(FileType.DIRECTORY) == 1 && count.get(FileType.FILE) == 0) {
+        while (Objects.nonNull(count.get(FileType.DIRECTORY)) && count.get(FileType.DIRECTORY) == 1 &&
+                Objects.isNull(count.get(FileType.FILE))) {
             FileEntity fileEntity = fileList.get(0);
             fileResponse = map(fileEntity);
             fileResponse.setFileName(fileName + PathUtils.SEPARATOR + fileResponse.getFileName());
