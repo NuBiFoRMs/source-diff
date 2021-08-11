@@ -5,19 +5,15 @@ import com.nubiform.sourcediff.constant.DiffType;
 import com.nubiform.sourcediff.service.DiffService;
 import com.nubiform.sourcediff.service.DirectoryService;
 import com.nubiform.sourcediff.util.PathUtils;
-import com.nubiform.sourcediff.validator.RepositoryValidator;
 import com.nubiform.sourcediff.vo.DiffResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.PathVariable;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.validation.Valid;
 import java.io.IOException;
 import java.util.List;
 
@@ -35,18 +31,9 @@ public class DiffController {
 
     private final AppProperties appProperties;
 
-    private final RepositoryValidator repositoryValidator;
-
     private final DirectoryService directoryService;
 
     private final DiffService diffService;
-
-    @InitBinder("repository")
-    protected void repositoryBinder(WebDataBinder webDataBinder) {
-        log.debug("repositoryBinder");
-        log.debug("webDataBinder: {}", webDataBinder);
-        webDataBinder.setValidator(repositoryValidator);
-    }
 
     @GetMapping(HOME_URI)
     public String home(Model model) {
@@ -58,7 +45,7 @@ public class DiffController {
     }
 
     @GetMapping(EXPLORER_URI + REPOSITORY_PATH + ANT_PATTERN)
-    public String explorer(@PathVariable @Valid String repository, Model model, HttpServletRequest request) {
+    public String explorer(@PathVariable String repository, Model model, HttpServletRequest request) {
         String path = PathUtils.removePrefix(request.getRequestURI(), EXPLORER_URI);
         log.info("request: {}, repository: {}, path: {}", EXPLORER_URI, repository, path);
 
@@ -72,7 +59,7 @@ public class DiffController {
     }
 
     @GetMapping(FILTER_URI + REPOSITORY_PATH + ANT_PATTERN)
-    public String filter(@PathVariable @Valid String repository, Model model, HttpServletRequest request) {
+    public String filter(@PathVariable String repository, Model model, HttpServletRequest request) {
         String path = PathUtils.removePrefix(request.getRequestURI(), FILTER_URI);
         log.info("request: {}, repository: {}, path: {}", FILTER_URI, repository, path);
 
@@ -83,7 +70,7 @@ public class DiffController {
     }
 
     @GetMapping(VIEW_URI + REPOSITORY_PATH + ANT_PATTERN)
-    public String view(@PathVariable @Valid String repository, Model model, HttpServletRequest request) throws IOException {
+    public String view(@PathVariable String repository, Model model, HttpServletRequest request) throws IOException {
         String path = PathUtils.removePrefix(request.getRequestURI(), VIEW_URI);
         log.info("request: {}, repository: {}, path: {}", VIEW_URI, repository, path);
 
