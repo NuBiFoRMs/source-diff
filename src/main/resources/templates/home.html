@@ -1,10 +1,26 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments.html :: head"></head>
 <body>
+<div th:replace="fragments.html :: nav-home"></div>
 
+<div class="container">
+    <div class="mt-5 mb-5">
+        <ul class="list-group">
+            <div th:each="repository : ${repositories}" th:remove="tag">
+                <a class="list-group-item list-group-item-action" th:href="@{/explorer/{path}(path=${repository.name})}">
+                    <div class="d-flex align-items-center">
+                        <div class="d-flex justify-content-center" style="width:2.2rem;font-size: 1.5rem">
+                            <i class="far fa-hdd"></i>
+                        </div>
+                        <h5 class="mt-2" th:text="${repository.name}">repository.name</h5>
+                    </div>
+                </a>
+            </div>
+        </ul>
+    </div>
+</div>
+
+<div th:replace="fragments.html :: footer"></div>
 </body>
 </html>

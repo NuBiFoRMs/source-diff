@@ -39,7 +39,7 @@ public class DirectoryService {
     public List<FileResponse> getParentPath(String path) {
         List<FileEntity> fileList = new ArrayList<>();
 
-        FileEntity fileEntity = fileRepository.findByFilePathAndFileType(path, FileType.DIRECTORY)
+        FileEntity fileEntity = fileRepository.findByFilePath(path)
                 .orElseThrow(RuntimeException::new);
         fileList.add(fileEntity);
 
@@ -81,7 +81,8 @@ public class DirectoryService {
                 .stream()
                 .collect(Collectors.groupingBy(FileEntity::getFileType, Collectors.counting()));
 
-        while (count.get(FileType.DIRECTORY) == 1 && count.get(FileType.FILE) == 0) {
+        while (Objects.nonNull(count.get(FileType.DIRECTORY)) && count.get(FileType.DIRECTORY) == 1 &&
+                Objects.isNull(count.get(FileType.FILE))) {
             FileEntity fileEntity = fileList.get(0);
             fileResponse = map(fileEntity);
             fileResponse.setFileName(fileName + PathUtils.SEPARATOR + fileResponse.getFileName());
