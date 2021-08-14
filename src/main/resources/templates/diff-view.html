@@ -31,16 +31,8 @@
             <div style="width: 100%; overflow-x: scroll">
                 <table class="diffTable" style="width: 100%">
                     <div th:each="row : ${diff}" th:remove="tag">
-                        <tr th:id="${row.line}" th:style="${row.visible ? 'display:block' : 'display:none'}" th:if="${row.changeType.equals('C')}" class="trCreate">
-                            <td th:utext="${row.newSource}" style="white-space: pre" nowrap>row.newSource</td>
-                        </tr>
-                        <tr th:id="${row.line}" th:style="${row.visible ? 'display:block' : 'display:none'}" th:if="${row.changeType.equals('U')}" class="trUpdate">
-                            <td th:utext="${row.newSource}" style="white-space: pre" nowrap>row.newSource</td>
-                        </tr>
-                        <tr th:id="${row.line}" th:style="${row.visible ? 'display:block' : 'display:none'}" th:if="${row.changeType.equals('D')}" class="trDelete">
-                            <td th:utext="${row.newSource}" style="white-space: pre" nowrap>row.newSource</td>
-                        </tr>
-                        <tr th:id="${row.line}" th:style="${row.visible ? 'display:block' : 'display:none'}" th:if="${row.changeType.equals('E')}">
+                        <tr th:id="${row.line}" th:style="${row.visible ? 'display:block' : 'display:none'}"
+                            th:class="${row.changeType.equals('C') ? 'trCreate' : row.changeType.equals('U') ? 'trUpdate' : row.changeType.equals('D') ? 'trDelete' : ''}">
                             <td th:utext="${row.newSource}" style="white-space: pre" nowrap>row.newSource</td>
                         </tr>
                     </div>
@@ -60,16 +52,8 @@
             <div style="width: 100%; overflow-x: scroll">
                 <table class="diffTable" style="width: 100%">
                     <div th:each="row : ${diff}" th:remove="tag">
-                        <tr th:id="${row.line}" th:style="${row.visible ? 'display:block' : 'display:none'}" th:if="${row.changeType.equals('C')}" class="trCreate">
-                            <td th:utext="${row.oldSource}" style="white-space: pre" nowrap>row.oldSource</td>
-                        </tr>
-                        <tr th:id="${row.line}" th:style="${row.visible ? 'display:block' : 'display:none'}" th:if="${row.changeType.equals('U')}" class="trUpdate">
-                            <td th:utext="${row.oldSource}" style="white-space: pre" nowrap>row.oldSource</td>
-                        </tr>
-                        <tr th:id="${row.line}" th:style="${row.visible ? 'display:block' : 'display:none'}" th:if="${row.changeType.equals('D')}" class="trDelete">
-                            <td th:utext="${row.oldSource}" style="white-space: pre" nowrap>row.oldSource</td>
-                        </tr>
-                        <tr th:id="${row.line}" th:style="${row.visible ? 'display:block' : 'display:none'}" th:if="${row.changeType.equals('E')}">
+                        <tr th:id="${row.line}" th:style="${row.visible ? 'display:block' : 'display:none'}"
+                            th:class="${row.changeType.equals('C') ? 'trCreate' : row.changeType.equals('U') ? 'trUpdate' : row.changeType.equals('D') ? 'trDelete' : ''}">
                             <td th:utext="${row.oldSource}" style="white-space: pre" nowrap>row.oldSource</td>
                         </tr>
                     </div>
