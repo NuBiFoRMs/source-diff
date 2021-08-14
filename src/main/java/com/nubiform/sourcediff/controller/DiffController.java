@@ -65,6 +65,9 @@ public class DiffController {
 
         model.addAttribute("repositories", appProperties.getRepositories());
         model.addAttribute("path", path);
+        model.addAttribute("parentPath", directoryService.getParentPath(path));
+        model.addAttribute("parent", directoryService.getParent(path));
+        model.addAttribute("files", directoryService.getFilterFileList(path));
 
         return "filter";
     }

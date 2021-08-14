@@ -100,4 +100,11 @@ public class DirectoryService {
     private FileResponse map(FileEntity fileEntity) {
         return modelMapper.map(fileEntity, FileResponse.class);
     }
+
+    public List<FileResponse> getFilterFileList(String path) {
+        return fileRepository.findAllByFilePathStartsWith(path, Sort.by("filePath", "fileType"))
+                .stream()
+                .map(this::map)
+                .collect(Collectors.toList());
+    }
 }
