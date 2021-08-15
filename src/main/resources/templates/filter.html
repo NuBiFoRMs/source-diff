@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head th:replace="fragments.html :: head"></head>
+<head>
+    <link rel="stylesheet" type="text/css" href="/css/filter.css">
+</head>
 <body>
 <div th:replace="fragments.html :: nav-main"></div>
 
@@ -12,7 +15,7 @@
                 <h5 class="mt-2">
                     <div th:each="eachPath : ${parentPath}" th:remove="tag">
                         <div th:if="${!path.equals(eachPath.filePath)}" th:remove="tag">
-                            <a th:href="@{/explorer{path}(path=${eachPath.filePath})}">
+                            <a th:href="@{/filter{path}(path=${eachPath.filePath})}">
                                 <div th:text="${eachPath.fileName}" th:remove="tag">eachPath.fileName</div></a> /
                         </div>
                         <div th:if="${path.equals(eachPath.filePath)}" th:remove="tag">
@@ -23,20 +26,20 @@
             </div>
 
             <div th:if="${parent != null}" th:remove="tag">
-                <a class="list-group-item list-group-item-action" th:href="@{/explorer{path}(path=${parent.filePath})}">
+                <a class="list-group-item list-group-item-action" th:href="@{/filter{path}(path=${parent.filePath})}">
                     <h5 class="mt-2">..</h5>
                 </a>
             </div>
 
             <div th:each="file : ${files}" th:remove="tag">
                 <div th:if="${#strings.equals(file.fileType, 'D')}" th:remove="tag">
-                    <a class="list-group-item list-group-item-action" th:href="@{/explorer{path}(path=${file.filePath})}">
+                    <a class="list-group-item list-group-item-action" th:href="@{/filter{path}(path=${file.filePath}, search=${search})}">
                         <div class="d-flex align-items-center justify-content-between">
                             <div class="d-flex align-items-center">
                                 <div class="d-flex justify-content-center" style="width:2.2rem;font-size: 1.5rem">
                                     <i class="far fa-folder"></i>
                                 </div>
-                                <h5 class="mt-2" th:text="${file.filePath}">file.filePath</h5>
+                                <h5 class="mt-2" th:utext="${file.filePathDisplay}">file.filePathDisplay</h5>
                             </div>
                             <div>
                                 <span class="badge rounded-pill bg-primary" th:if="${file.diffCount > 0}" th:text="${file.diffCount}">file.diffCount</span>
@@ -52,7 +55,7 @@
                                 <div class="d-flex justify-content-center" style="width:2.2rem;font-size: 1.5rem">
                                     <i class="far fa-file"></i>
                                 </div>
-                                <h5 class="mt-2" th:text="${file.filePath}">file.filePath</h5>
+                                <h5 class="mt-2" th:utext="${file.filePathDisplay}">file.filePathDisplay</h5>
                             </div>
                             <div>
                                 <div th:if="${file.isDevOnly()}" th:remove="tag">

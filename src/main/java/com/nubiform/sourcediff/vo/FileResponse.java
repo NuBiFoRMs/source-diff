@@ -13,6 +13,8 @@ public class FileResponse {
 
     private String filePath;
 
+    private String filePathDisplay;
+
     private String fileType;
 
     private String fileName;
