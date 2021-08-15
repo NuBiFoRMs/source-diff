@@ -8,30 +8,35 @@
 
 <div class="m-2 list-group">
     <div class="list-group-item">
-        <div th:each="eachPath : ${parentPath}" th:remove="tag">
-            <div th:if="${eachPath.fileType.equals('D')}" th:remove="tag">
-                <a th:href="@{/explorer{path}(path=${eachPath.filePath})}">
-                    <div th:text="${eachPath.fileName}" th:remove="tag">eachPath.fileName</div></a> /
+        <div th:each="path : ${parentPath}" th:remove="tag">
+            <div th:if="${path.fileType.equals('D')}" th:remove="tag">
+                <a th:href="@{/explorer{path}(path=${path.filePath})}">
+                    <div th:text="${path.fileName}" th:remove="tag">path.fileName</div></a> /
             </div>
-            <div th:if="${eachPath.fileType.equals('F')}" th:remove="tag">
-                <div th:text="${eachPath.fileName}" th:remove="tag">eachPath.fileName</div>
+            <div th:if="${path.fileType.equals('F')}" th:remove="tag">
+                <div th:text="${path.fileName}" th:remove="tag">path.fileName</div>
             </div>
         </div>
     </div>
+
     <div class="list-group-item d-flex justify-content-between">
         <div class="d-flex" style="width: 100%; overflow-x: hidden">
-            <table class="mx-2 diffTable">
-                <div th:each="row : ${diff}" th:remove="tag">
-                    <tr th:id="${row.line}">
-                        <td align="right" class="text-muted" th:text="${row.newLine}">row.newLine</td>
-                    </tr>
-                </div>
-            </table>
+            <div>
+                <table class="mx-2 diffTable">
+                    <div th:each="row : ${diff}" th:remove="tag">
+                        <tr class="source"
+                            th:id="${row.line}">
+                            <td align="right" class="text-muted" th:text="${row.newLine}">row.newLine</td>
+                        </tr>
+                    </div>
+                </table>
+            </div>
 
             <div style="width: 100%; overflow-x: scroll">
                 <table class="diffTable" style="width: 100%">
                     <div th:each="row : ${diff}" th:remove="tag">
-                        <tr th:id="${row.line}">
+                        <tr class="source"
+                            th:id="${row.line}">
                             <td th:utext="${row.newSource}" style="white-space: pre" nowrap>row.newSource</td>
                         </tr>
                     </div>
