@@ -1,0 +1,22 @@
+spring:
+  devtools:
+    add-properties: false
+
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    open-in-view: false
+
+source-diff:
+  show-line-count: 30
+  repositories:
+    - name:
+      svn-username:
+      svn-password:
+      dev-url:
+      prod-url:
+
+file-filter:
+  prefix:
+  postfix:
+  contains:
