@@ -44,6 +44,7 @@ public class DiffController {
         log.info("request: {}", HOME_URI);
 
         model.addAttribute("repositories", appProperties.getRepositories());
+        model.addAttribute("files", directoryService.getRepositories());
 
         return "home";
     }

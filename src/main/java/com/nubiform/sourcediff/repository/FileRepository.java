@@ -8,6 +8,8 @@ import java.util.Optional;
 
 public interface FileRepository extends JpaRepository<FileEntity, Long> {
 
+    List<FileEntity> findAllByParentIdIsNull();
+
     Optional<FileEntity> findByFilePath(String filePath);
 
     Optional<FileEntity> findByFilePathAndFileType(String filePath, String fileType);

@@ -7,15 +7,30 @@
 <div class="container">
     <div class="mt-5 mb-5">
         <ul class="list-group">
-            <div th:each="repository : ${repositories}" th:remove="tag">
-                <a class="list-group-item list-group-item-action" th:href="@{/explorer/{path}(path=${repository.name})}">
-                    <div class="d-flex align-items-center">
-                        <div class="d-flex justify-content-center" style="width:2.2rem;font-size: 1.5rem">
-                            <i class="far fa-hdd"></i>
+            <div th:each="file : ${files}" th:remove="tag">
+                <div th:if="${#strings.equals(file.fileType, 'D')}" th:remove="tag">
+                    <a class="list-group-item list-group-item-action" th:href="@{/explorer{path}(path=${file.filePath})}">
+                        <div class="d-flex align-items-center justify-content-between">
+                            <div class="d-flex align-items-center">
+                                <div class="d-flex justify-content-center" style="width:2.2rem;font-size: 1.5rem">
+                                    <i class="far fa-hdd"></i>
+                                </div>
+                                <h5 class="mt-2" th:text="${file.fileName}">file.fileName</h5>
+                            </div>
+                            <div>
+                                <div th:if="${file.isDevOnly()}" th:remove="tag">
+                                    <span class="badge rounded-pill bg-success">Dev</span>
+                                </div>
+                                <div th:if="${file.isProdOnly()}" th:remove="tag">
+                                    <span class="badge rounded-pill bg-secondary">Prod</span>
+                                </div>
+                                <div th:if="${file.diffCount > 0}" th:remove="tag">
+                                    <span class="badge rounded-pill bg-primary" th:text="${file.diffCount}">file.diffCount</span>
+                                </div>
+                            </div>
                         </div>
-                        <h5 class="mt-2" th:text="${repository.name}">repository.name</h5>
-                    </div>
-                </a>
+                    </a>
+                </div>
             </div>
         </ul>
     </div>
