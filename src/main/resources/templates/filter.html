@@ -16,7 +16,7 @@
                     <h5 class="mt-2">
                         <div th:each="eachPath : ${parentPath}" th:remove="tag">
                             <div th:if="${!path.equals(eachPath.filePath)}" th:remove="tag">
-                                <a th:href="@{/filter{path}(path=${eachPath.filePath}, diff=${diffCheck}, dev=${devCheck}, prod=${prodCheck})}">
+                                <a th:href="@{/filter{path}(path=${eachPath.filePath}, search=${search}, diff=${diffCheck}, dev=${devCheck}, prod=${prodCheck})}">
                                     <div th:text="${eachPath.fileName}" th:remove="tag">eachPath.fileName</div></a> /
                             </div>
                             <div th:if="${path.equals(eachPath.filePath)}" th:remove="tag">
@@ -25,9 +25,9 @@
                         </div>
                     </h5>
                     <div class="d-flex align-items-center">
-                        <span class="badge bg-warning me-1" th:if="${diffCheck}">Diff.</span>
-                        <span class="badge bg-success me-1" th:if="${devCheck}">Dev</span>
-                        <span class="badge bg-secondary me-1" th:if="${prodCheck}">Prod</span>
+                        <span class="badge rounded-pill bg-warning text-dark me-1" th:if="${diffCheck}">Diff.</span>
+                        <span class="badge rounded-pill bg-success me-1" th:if="${devCheck}">Dev</span>
+                        <span class="badge rounded-pill bg-secondary me-1" th:if="${prodCheck}">Prod</span>
                         <div th:text="${search}">search</div>
                         <div class="d-flex justify-content-center" style="width:2.2rem;font-size: 1.5rem">
                             <a class="link-dark" th:href="@{/explorer{path}(path=${path})}"><i class="far fa-window-close"></i></a>
@@ -37,7 +37,7 @@
             </div>
 
             <div th:if="${parent != null}" th:remove="tag">
-                <a class="list-group-item list-group-item-action" th:href="@{/filter{path}(path=${parent.filePath}, diff=${diffCheck}, dev=${devCheck}, prod=${prodCheck})}">
+                <a class="list-group-item list-group-item-action" th:href="@{/filter{path}(path=${parent.filePath}, search=${search}, diff=${diffCheck}, dev=${devCheck}, prod=${prodCheck})}">
                     <h5 class="mt-2">..</h5>
                 </a>
             </div>

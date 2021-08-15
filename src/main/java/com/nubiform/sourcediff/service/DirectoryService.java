@@ -23,6 +23,13 @@ public class DirectoryService {
 
     private final ModelMapper modelMapper;
 
+    public List<FileResponse> getRepositories() {
+        return fileRepository.findAllByParentIdIsNull()
+                .stream()
+                .map(this::map)
+                .collect(Collectors.toList());
+    }
+
     public FileResponse getParent(String path) {
         Long parentId = fileRepository.findByFilePathAndFileType(path, FileType.DIRECTORY)
                 .map(FileEntity::getParentId)
