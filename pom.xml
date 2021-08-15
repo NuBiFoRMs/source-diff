@@ -10,9 +10,9 @@
     </parent>
     <groupId>com.nubiform</groupId>
     <artifactId>source-diff</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>1.0.0</version>
     <name>source-diff</name>
-    <description>Demo project for Spring Boot</description>
+    <description>Source Diff.</description>
     <properties>
         <java.version>1.8</java.version>
     </properties>
