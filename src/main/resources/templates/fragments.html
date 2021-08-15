@@ -41,10 +41,16 @@
                     </ul>
                 </li>
             </ul>
-<!--            <form class="d-flex">-->
-<!--                <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">-->
-<!--                <button class="btn btn-outline-success" type="submit">Search</button>-->
-<!--            </form>-->
+            <form class="d-flex" th:action="@{/filter{path}(path=${path})}">
+                <input type="checkbox" class="btn-check" id="check-diff" name="diff" th:checked="${diffCheck}">
+                <label class="btn btn-outline-warning me-2" for="check-diff">Diff.</label>
+                <input type="checkbox" class="btn-check" id="check-dev" name="dev" th:checked="${devCheck}">
+                <label class="btn btn-outline-success me-2" for="check-dev">Dev</label>
+                <input type="checkbox" class="btn-check" id="check-prod" name="prod" th:checked="${prodCheck}">
+                <label class="btn btn-outline-secondary me-2" for="check-prod">Prod</label>
+                <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search" name="search" th:value="${search}">
+                <button class="btn btn-outline-success" type="submit">Search</button>
+            </form>
         </div>
     </div>
 </nav>

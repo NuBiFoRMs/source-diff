@@ -15,4 +15,6 @@ public interface FileRepository extends JpaRepository<FileEntity, Long> {
     List<FileEntity> findAllByParentId(Long parentId);
 
     List<FileEntity> findAllByParentId(Long parentId, Sort sort);
+
+    List<FileEntity> findAllByFilePathStartsWith(String filePath, Sort sort);
 }

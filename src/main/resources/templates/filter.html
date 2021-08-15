@@ -1,10 +1,101 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments.html :: head"></head>
 <head>
-    <meta charset="UTF-8">
-    <title>Title</title>
+    <link rel="stylesheet" type="text/css" href="/css/filter.css">
 </head>
 <body>
+<div th:replace="fragments.html :: nav-main"></div>
 
+<div class="container">
+    <div class="mt-5 mb-5">
+        <ul class="list-group">
+
+            <div class="list-group-item">
+                <div class="d-flex align-items-center justify-content-between">
+                    <h5 class="mt-2">
+                        <div th:each="eachPath : ${parentPath}" th:remove="tag">
+                            <div th:if="${!path.equals(eachPath.filePath)}" th:remove="tag">
+                                <a th:href="@{/filter{path}(path=${eachPath.filePath}, diff=${diffCheck}, dev=${devCheck}, prod=${prodCheck})}">
+                                    <div th:text="${eachPath.fileName}" th:remove="tag">eachPath.fileName</div></a> /
+                            </div>
+                            <div th:if="${path.equals(eachPath.filePath)}" th:remove="tag">
+                                <div th:text="${eachPath.fileName}" th:remove="tag">eachPath.fileName</div></a> /
+                            </div>
+                        </div>
+                    </h5>
+                    <div class="d-flex align-items-center">
+                        <span class="badge bg-warning me-1" th:if="${diffCheck}">Diff.</span>
+                        <span class="badge bg-success me-1" th:if="${devCheck}">Dev</span>
+                        <span class="badge bg-secondary me-1" th:if="${prodCheck}">Prod</span>
+                        <div th:text="${search}">search</div>
+                        <div class="d-flex justify-content-center" style="width:2.2rem;font-size: 1.5rem">
+                            <a class="link-dark" th:href="@{/explorer{path}(path=${path})}"><i class="far fa-window-close"></i></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div th:if="${parent != null}" th:remove="tag">
+                <a class="list-group-item list-group-item-action" th:href="@{/filter{path}(path=${parent.filePath}, diff=${diffCheck}, dev=${devCheck}, prod=${prodCheck})}">
+                    <h5 class="mt-2">..</h5>
+                </a>
+            </div>
+
+            <div th:each="file : ${files}" th:remove="tag">
+                <div th:if="${#strings.equals(file.fileType, 'D')}" th:remove="tag">
+                    <a class="list-group-item list-group-item-action" th:href="@{/filter{path}(path=${file.filePath}, search=${search}, diff=${diffCheck}, dev=${devCheck}, prod=${prodCheck})}">
+                        <div class="d-flex align-items-center justify-content-between">
+                            <div class="d-flex align-items-center">
+                                <div class="d-flex justify-content-center" style="width:2.2rem;font-size: 1.5rem">
+                                    <i class="far fa-folder"></i>
+                                </div>
+                                <h5 class="mt-2" th:utext="${file.filePathDisplay}">file.filePathDisplay</h5>
+                            </div>
+                            <div>
+                                <div th:if="${file.isDevOnly()}" th:remove="tag">
+                                    <span class="badge rounded-pill bg-success">Dev</span>
+                                </div>
+                                <div th:if="${file.isProdOnly()}" th:remove="tag">
+                                    <span class="badge rounded-pill bg-secondary">Prod</span>
+                                </div>
+                                <div th:if="${file.diffCount > 0}" th:remove="tag">
+                                    <span class="badge rounded-pill bg-primary" th:text="${file.diffCount}">file.diffCount</span>
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+
+                <div th:if="${#strings.equals(file.fileType, 'F')}" th:remove="tag">
+                    <a class="list-group-item list-group-item-action" th:href="@{/view{path}(path=${file.filePath})}">
+                        <div class="d-flex align-items-center justify-content-between">
+                            <div class="d-flex align-items-center">
+                                <div class="d-flex justify-content-center" style="width:2.2rem;font-size: 1.5rem">
+                                    <i class="far fa-file"></i>
+                                </div>
+                                <h5 class="mt-2" th:utext="${file.filePathDisplay}">file.filePathDisplay</h5>
+                            </div>
+                            <div>
+                                <div th:if="${file.isDevOnly()}" th:remove="tag">
+                                    <span class="badge rounded-pill bg-success">Dev</span>
+                                </div>
+                                <div th:if="${file.isProdOnly()}" th:remove="tag">
+                                    <span class="badge rounded-pill bg-secondary">Prod</span>
+                                </div>
+                                <div th:if="${file.diffCount > 0}" th:remove="tag">
+                                    <span class="badge rounded-pill bg-warning text-dark" th:text="${file.diffCount}">file.diffCount</span>
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+
+        </ul>
+    </div>
+</div>
+
+<div th:replace="fragments.html :: footer"></div>
 </body>
 </html>

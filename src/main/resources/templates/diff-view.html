@@ -22,7 +22,7 @@
         <div class="d-flex" style="width: 100%; overflow-x: hidden">
             <table class="mx-2 diffTable">
                 <div th:each="row : ${diff}" th:remove="tag">
-                    <tr th:if="${row.visible}">
+                    <tr th:id="${row.line}" th:style="${row.visible ? 'display:block' : 'display:none'}">
                         <td align="right" class="text-muted" th:text="${row.newLine}">row.newLine</td>
                     </tr>
                 </div>
@@ -31,16 +31,8 @@
             <div style="width: 100%; overflow-x: scroll">
                 <table class="diffTable" style="width: 100%">
                     <div th:each="row : ${diff}" th:remove="tag">
-                        <tr th:if="${row.changeType.equals('C') && row.visible}" class="trCreate">
-                            <td th:utext="${row.newSource}" style="white-space: pre" nowrap>row.newSource</td>
-                        </tr>
-                        <tr th:if="${row.changeType.equals('U') && row.visible}" class="trUpdate">
-                            <td th:utext="${row.newSource}" style="white-space: pre" nowrap>row.newSource</td>
-                        </tr>
-                        <tr th:if="${row.changeType.equals('D') && row.visible}" class="trDelete">
-                            <td th:utext="${row.newSource}" style="white-space: pre" nowrap>row.newSource</td>
-                        </tr>
-                        <tr th:if="${row.changeType.equals('E') && row.visible}">
+                        <tr th:id="${row.line}" th:style="${row.visible ? 'display:block' : 'display:none'}"
+                            th:class="${row.changeType.equals('C') ? 'trCreate' : row.changeType.equals('U') ? 'trUpdate' : row.changeType.equals('D') ? 'trDelete' : ''}">
                             <td th:utext="${row.newSource}" style="white-space: pre" nowrap>row.newSource</td>
                         </tr>
                     </div>
@@ -51,7 +43,7 @@
         <div class="d-flex" style="width: 100%; overflow-x: hidden">
             <table class="mx-2 diffTable">
                 <div th:each="row : ${diff}" th:remove="tag">
-                    <tr th:if="${row.visible}">
+                    <tr th:id="${row.line}" th:style="${row.visible ? 'display:block' : 'display:none'}">
                         <td align="right" class="text-muted" th:text="${row.oldLine}">row.oldLine</td>
                     </tr>
                 </div>
@@ -60,16 +52,8 @@
             <div style="width: 100%; overflow-x: scroll">
                 <table class="diffTable" style="width: 100%">
                     <div th:each="row : ${diff}" th:remove="tag">
-                        <tr th:if="${row.changeType.equals('C') && row.visible}" class="trCreate">
-                            <td th:utext="${row.oldSource}" style="white-space: pre" nowrap>row.oldSource</td>
-                        </tr>
-                        <tr th:if="${row.changeType.equals('U') && row.visible}" class="trUpdate">
-                            <td th:utext="${row.oldSource}" style="white-space: pre" nowrap>row.oldSource</td>
-                        </tr>
-                        <tr th:if="${row.changeType.equals('D') && row.visible}" class="trDelete">
-                            <td th:utext="${row.oldSource}" style="white-space: pre" nowrap>row.oldSource</td>
-                        </tr>
-                        <tr th:if="${row.changeType.equals('E') && row.visible}">
+                        <tr th:id="${row.line}" th:style="${row.visible ? 'display:block' : 'display:none'}"
+                            th:class="${row.changeType.equals('C') ? 'trCreate' : row.changeType.equals('U') ? 'trUpdate' : row.changeType.equals('D') ? 'trDelete' : ''}">
                             <td th:utext="${row.oldSource}" style="white-space: pre" nowrap>row.oldSource</td>
                         </tr>
                     </div>
