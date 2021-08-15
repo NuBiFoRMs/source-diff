@@ -12,28 +12,39 @@
         <ul class="list-group">
 
             <div class="list-group-item">
-                <h5 class="mt-2">
-                    <div th:each="eachPath : ${parentPath}" th:remove="tag">
-                        <div th:if="${!path.equals(eachPath.filePath)}" th:remove="tag">
-                            <a th:href="@{/filter{path}(path=${eachPath.filePath})}">
+                <div class="d-flex align-items-center justify-content-between">
+                    <h5 class="mt-2">
+                        <div th:each="eachPath : ${parentPath}" th:remove="tag">
+                            <div th:if="${!path.equals(eachPath.filePath)}" th:remove="tag">
+                                <a th:href="@{/filter{path}(path=${eachPath.filePath}, diff=${diffCheck}, dev=${devCheck}, prod=${prodCheck})}">
+                                    <div th:text="${eachPath.fileName}" th:remove="tag">eachPath.fileName</div></a> /
+                            </div>
+                            <div th:if="${path.equals(eachPath.filePath)}" th:remove="tag">
                                 <div th:text="${eachPath.fileName}" th:remove="tag">eachPath.fileName</div></a> /
+                            </div>
                         </div>
-                        <div th:if="${path.equals(eachPath.filePath)}" th:remove="tag">
-                            <div th:text="${eachPath.fileName}" th:remove="tag">eachPath.fileName</div></a> /
+                    </h5>
+                    <div class="d-flex align-items-center">
+                        <span class="badge bg-warning me-1" th:if="${diffCheck}">Diff.</span>
+                        <span class="badge bg-success me-1" th:if="${devCheck}">Dev</span>
+                        <span class="badge bg-secondary me-1" th:if="${prodCheck}">Prod</span>
+                        <div th:text="${search}">search</div>
+                        <div class="d-flex justify-content-center" style="width:2.2rem;font-size: 1.5rem">
+                            <a class="link-dark" th:href="@{/explorer{path}(path=${path})}"><i class="far fa-window-close"></i></a>
                         </div>
                     </div>
-                </h5>
+                </div>
             </div>
 
             <div th:if="${parent != null}" th:remove="tag">
-                <a class="list-group-item list-group-item-action" th:href="@{/filter{path}(path=${parent.filePath})}">
+                <a class="list-group-item list-group-item-action" th:href="@{/filter{path}(path=${parent.filePath}, diff=${diffCheck}, dev=${devCheck}, prod=${prodCheck})}">
                     <h5 class="mt-2">..</h5>
                 </a>
             </div>
 
             <div th:each="file : ${files}" th:remove="tag">
                 <div th:if="${#strings.equals(file.fileType, 'D')}" th:remove="tag">
-                    <a class="list-group-item list-group-item-action" th:href="@{/filter{path}(path=${file.filePath}, search=${search})}">
+                    <a class="list-group-item list-group-item-action" th:href="@{/filter{path}(path=${file.filePath}, search=${search}, diff=${diffCheck}, dev=${devCheck}, prod=${prodCheck})}">
                         <div class="d-flex align-items-center justify-content-between">
                             <div class="d-flex align-items-center">
                                 <div class="d-flex justify-content-center" style="width:2.2rem;font-size: 1.5rem">
@@ -42,7 +53,15 @@
                                 <h5 class="mt-2" th:utext="${file.filePathDisplay}">file.filePathDisplay</h5>
                             </div>
                             <div>
-                                <span class="badge rounded-pill bg-primary" th:if="${file.diffCount > 0}" th:text="${file.diffCount}">file.diffCount</span>
+                                <div th:if="${file.isDevOnly()}" th:remove="tag">
+                                    <span class="badge rounded-pill bg-success">Dev</span>
+                                </div>
+                                <div th:if="${file.isProdOnly()}" th:remove="tag">
+                                    <span class="badge rounded-pill bg-secondary">Prod</span>
+                                </div>
+                                <div th:if="${file.diffCount > 0}" th:remove="tag">
+                                    <span class="badge rounded-pill bg-primary" th:text="${file.diffCount}">file.diffCount</span>
+                                </div>
                             </div>
                         </div>
                     </a>

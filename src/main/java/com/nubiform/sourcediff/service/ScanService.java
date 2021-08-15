@@ -41,7 +41,7 @@ public class ScanService {
 
     private final FilenameFilter filenameFilter;
 
-    @Scheduled(fixedDelay = 300000)
+    @Scheduled(fixedDelay = 3000000)
     public void scan() {
         appProperties.getRepositories()
                 .forEach(this::scan);

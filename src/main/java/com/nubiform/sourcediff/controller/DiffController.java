@@ -63,25 +63,41 @@ public class DiffController {
     }
 
     @GetMapping(FILTER_URI + REPOSITORY_PATH + ANT_PATTERN)
-    public String filter(@PathVariable String repository, @RequestParam(required = false) String search, Model model, HttpServletRequest request) {
+    public String filter(@PathVariable String repository,
+                         @RequestParam(required = false) String search,
+                         @RequestParam(required = false) boolean diff,
+                         @RequestParam(required = false) boolean dev,
+                         @RequestParam(required = false) boolean prod,
+                         Model model, HttpServletRequest request) {
         String path = PathUtils.removePrefix(request.getRequestURI(), FILTER_URI);
-        log.info("request: {}, repository: {}, path: {}, search: {}", FILTER_URI, repository, path, search);
+        log.info("request: {}, repository: {}, path: {}, search: {}, diff: {}, dev: {}, prod: {}", FILTER_URI, repository, path, search, diff, dev, prod);
 
         model.addAttribute("repositories", appProperties.getRepositories());
         model.addAttribute("path", path);
         model.addAttribute("parentPath", directoryService.getParentPath(path));
         model.addAttribute("parent", directoryService.getParent(path));
+        model.addAttribute("diffCheck", diff);
+        model.addAttribute("devCheck", dev);
+        model.addAttribute("prodCheck", prod);
 
         List<FileResponse> fileList = directoryService.getFilterFileList(path);
 
         if (StringUtils.isNotBlank(search)) {
             model.addAttribute("search", search);
-            fileList = fileList.stream()
+            fileList = fileList
+                    .stream()
                     .filter(fileResponse -> StringUtils.containsIgnoreCase(fileResponse.getFilePath(), search))
                     .map(fileResponse -> {
                         fileResponse.setFilePathDisplay(PathUtils.highlight(fileResponse.getFilePath(), search, s -> "<span class=\"highlight\">" + s + "</span>"));
                         return fileResponse;
                     })
+                    .collect(Collectors.toList());
+        }
+
+        if (diff || dev || prod) {
+            fileList = fileList
+                    .stream()
+                    .filter(fileResponse -> (diff && fileResponse.canDiff()) || (dev && fileResponse.isDevOnly()) || (prod && fileResponse.isProdOnly()))
                     .collect(Collectors.toList());
         }
 
