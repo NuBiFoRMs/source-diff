@@ -8,7 +8,9 @@ spring:
     open-in-view: false
 
 source-diff:
+  host:
   show-line-count: 30
+  receivers:
   repositories:
     - name:
       dev-url:
