@@ -4,6 +4,7 @@ import com.nubiform.sourcediff.config.AppProperties;
 import com.nubiform.sourcediff.constant.DiffType;
 import com.nubiform.sourcediff.service.DiffService;
 import com.nubiform.sourcediff.service.DirectoryService;
+import com.nubiform.sourcediff.service.MailService;
 import com.nubiform.sourcediff.util.PathUtils;
 import com.nubiform.sourcediff.vo.DiffResponse;
 import com.nubiform.sourcediff.vo.FileResponse;
@@ -15,6 +16,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
@@ -36,8 +38,8 @@ public class DiffController {
     private final AppProperties appProperties;
 
     private final DirectoryService directoryService;
-
     private final DiffService diffService;
+    private final MailService mailService;
 
     @GetMapping(HOME_URI)
     public String home(Model model) {
@@ -123,5 +125,16 @@ public class DiffController {
             return "diff-view";
         else
             return "view";
+    }
+
+    @ResponseBody
+    @GetMapping("/mailing")
+    public String mailing() {
+        appProperties.getRepositories()
+                .stream()
+                .map(AppProperties.RepositoryProperties::getName)
+                .forEach(mailService::mailing);
+        
+        return "SUCCESS";
     }
 }
