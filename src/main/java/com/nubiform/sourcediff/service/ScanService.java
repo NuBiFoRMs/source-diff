@@ -57,9 +57,15 @@ public class ScanService {
         svnConnector.checkout(repositoryProperties.getDevUrl(), "HEAD", devPath, repositoryProperties.getDevUsername(), repositoryProperties.getDevPassword());
         svnConnector.checkout(repositoryProperties.getProdUrl(), "HEAD", prodPath, repositoryProperties.getProdUsername(), repositoryProperties.getProdPassword());
 
+        log.debug("clean cache");
+        fileRepository.cleanByRepository(repositoryProperties.getName());
+
         log.debug("scan directory");
         directoryScan(repositoryProperties.getName(), SourceType.DEV, devPath);
         directoryScan(repositoryProperties.getName(), SourceType.PROD, prodPath);
+
+        log.debug("clean deleted file");
+        fileRepository.deleteByRepository(repositoryProperties.getName());
 
         log.debug("scan init diff");
         diffScan(PathUtils.SEPARATOR + repositoryProperties.getName());
