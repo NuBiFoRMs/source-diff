@@ -11,7 +11,11 @@ import java.util.List;
 @ConfigurationProperties("source-diff")
 public class AppProperties {
 
+    private String host;
+
     private int showLineCount;
+
+    private List<String> receivers;
 
     private List<RepositoryProperties> repositories;
 
