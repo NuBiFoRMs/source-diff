@@ -11,10 +11,12 @@ source-diff:
   show-line-count: 30
   repositories:
     - name:
-      svn-username:
-      svn-password:
       dev-url:
+      dev-username:
+      dev-password:
       prod-url:
+      prod-username:
+      prod-password:
 
 file-filter:
   prefix:
