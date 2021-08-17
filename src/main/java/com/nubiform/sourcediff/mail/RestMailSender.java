@@ -3,6 +3,7 @@ package com.nubiform.sourcediff.mail;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.RequestEntity;
 import org.springframework.stereotype.Service;
@@ -11,6 +12,7 @@ import org.springframework.web.client.RestTemplate;
 @Slf4j
 @RequiredArgsConstructor
 @Service
+@EnableConfigurationProperties(MailingProperties.class)
 @ConditionalOnProperty(prefix = "mailing", name = "enabled", havingValue = "true")
 public class RestMailSender implements MailSender {
 
