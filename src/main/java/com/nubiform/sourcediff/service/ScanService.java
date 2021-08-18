@@ -68,7 +68,7 @@ public class ScanService {
         fileRepository.deleteByRepository(repositoryProperties.getName());
 
         log.debug("scan init diff");
-        diffScan(PathUtils.SEPARATOR + repositoryProperties.getName());
+        detailScan(PathUtils.SEPARATOR + repositoryProperties.getName());
 
         log.info("finish scan: {}", repositoryProperties.getName());
     }
@@ -118,7 +118,7 @@ public class ScanService {
         }
     }
 
-    private int diffScan(String path) {
+    private int detailScan(String path) {
         log.debug("diffScan: {}", path);
         FileEntity fileEntity = fileRepository.findByFilePathAndFileType(path, FileType.DIRECTORY)
                 .orElseThrow(RuntimeException::new);
@@ -128,11 +128,14 @@ public class ScanService {
         List<FileEntity> fileList = fileRepository.findAllByParentId(fileEntity.getId());
         for (FileEntity file : fileList) {
             if (FileType.DIRECTORY.equals(file.getFileType())) {
-                count += diffScan(file.getFilePath());
+                count += detailScan(file.getFilePath());
             } else {
-                if (Objects.nonNull(file.getDevFilePath()) && Objects.nonNull(file.getProdFilePath())) {
-                    if (Objects.isNull(file.getScanModified()) ||
-                            file.getScanModified().isBefore(file.getDevModified()) || file.getScanModified().isBefore(file.getProdModified())) {
+                if (Objects.isNull(file.getScanModified()) ||
+                        (Objects.nonNull(file.getDevFilePath()) && file.getScanModified().isBefore(file.getDevModified())) ||
+                        (Objects.nonNull(file.getProdFilePath()) && file.getScanModified().isBefore(file.getProdModified()))) {
+
+                    // diff.
+                    if (Objects.nonNull(file.getDevFilePath()) && Objects.nonNull(file.getProdFilePath())) {
                         int diffSize = 0;
                         try {
                             diffSize = getDiffSize(file);
@@ -140,11 +143,33 @@ public class ScanService {
                             log.error(e.getLocalizedMessage());
                         }
                         file.setDiffCount(diffSize);
-                        file.setScanModified(LocalDateTime.now());
-                        fileRepository.save(file);
+                    } else {
+                        file.setDiffCount(0);
                     }
-                    if (file.getDiffCount() > 0) count++;
+
+                    // svn info.
+                    if (Objects.nonNull(file.getDevFilePath())) {
+                        Map<String, Object> svnInfo = svnConnector.log(new File(file.getDevFilePath()));
+                        log.debug("svnInfo: {}", svnInfo);
+                        file.setDevRevision((String) svnInfo.get("revision"));
+                        file.setDevMessage((String) svnInfo.get("msg"));
+                        file.setDevCommitTime((LocalDateTime) svnInfo.get("date"));
+                        file.setDevAuthor((String) svnInfo.get("author"));
+                    }
+                    if (Objects.nonNull(file.getProdFilePath())) {
+                        Map<String, Object> svnInfo = svnConnector.log(new File(file.getProdFilePath()));
+                        log.debug("svnInfo: {}", svnInfo);
+                        file.setProdRevision((String) svnInfo.get("revision"));
+                        file.setProdMessage((String) svnInfo.get("msg"));
+                        file.setProdCommitTime((LocalDateTime) svnInfo.get("date"));
+                        file.setProdAuthor((String) svnInfo.get("author"));
+                    }
+
+
+                    file.setScanModified(LocalDateTime.now());
+                    fileRepository.save(file);
                 }
+                if (file.getDiffCount() > 0) count++;
             }
         }
 

@@ -35,13 +35,29 @@ public class FileEntity {
 
     private String devFilePath;
 
-    private String prodFilePath;
-
-    private Integer diffCount;
-
     private LocalDateTime devModified;
 
+    private String devRevision;
+
+    private String devMessage;
+
+    private LocalDateTime devCommitTime;
+
+    private String devAuthor;
+
+    private String prodFilePath;
+
     private LocalDateTime prodModified;
+
+    private String prodRevision;
+
+    private String prodMessage;
+
+    private LocalDateTime prodCommitTime;
+
+    private String prodAuthor;
+
+    private Integer diffCount;
 
     private LocalDateTime scanModified;
 }
