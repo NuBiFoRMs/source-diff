@@ -14,7 +14,6 @@ import com.nubiform.sourcediff.util.PathUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,7 +29,6 @@ import java.util.stream.Stream;
 @Slf4j
 @RequiredArgsConstructor
 @Service
-@Transactional
 public class ScanService {
 
     private final AppProperties appProperties;
@@ -41,12 +39,7 @@ public class ScanService {
 
     private final FilenameFilter filenameFilter;
 
-    @Scheduled(fixedDelay = 150000)
-    public void scan() {
-        appProperties.getRepositories()
-                .forEach(this::scan);
-    }
-
+    @Transactional
     public void scan(AppProperties.RepositoryProperties repositoryProperties) {
         log.info("start scan: {}", repositoryProperties.getName());
 
@@ -180,5 +173,35 @@ public class ScanService {
         }
 
         return 0;
+    }
+
+    @Transactional
+    public FileEntity updateSvnInfo(FileEntity file) {
+        if (Objects.isNull(file.getInfoModified()) ||
+                (Objects.nonNull(file.getDevFilePath()) && file.getInfoModified().isBefore(file.getDevModified())) ||
+                (Objects.nonNull(file.getProdFilePath()) && file.getInfoModified().isBefore(file.getProdModified()))) {
+
+            // svn info.
+            if (Objects.nonNull(file.getDevFilePath())) {
+                Map<String, Object> svnInfo = svnConnector.log(new File(file.getDevFilePath()));
+                log.debug("svnInfo: {}", svnInfo);
+                file.setDevRevision((String) svnInfo.get("revision"));
+                file.setDevMessage((String) svnInfo.get("msg"));
+                file.setDevCommitTime((LocalDateTime) svnInfo.get("date"));
+                file.setDevAuthor((String) svnInfo.get("author"));
+            }
+            if (Objects.nonNull(file.getProdFilePath())) {
+                Map<String, Object> svnInfo = svnConnector.log(new File(file.getProdFilePath()));
+                log.debug("svnInfo: {}", svnInfo);
+                file.setProdRevision((String) svnInfo.get("revision"));
+                file.setProdMessage((String) svnInfo.get("msg"));
+                file.setProdCommitTime((LocalDateTime) svnInfo.get("date"));
+                file.setProdAuthor((String) svnInfo.get("author"));
+            }
+
+            file.setInfoModified(LocalDateTime.now());
+        }
+
+        return fileRepository.save(file);
     }
 }
