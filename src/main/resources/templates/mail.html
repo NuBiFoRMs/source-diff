@@ -16,7 +16,7 @@
             border-style: solid;
             border-width: 1px;
             padding: 3px;
-            background-color: aqua;
+            background-color: rgb(212, 244, 250);
             text-align: center;
             font-weight: bold;
             font-size: 9pt;
@@ -37,6 +37,10 @@
     <tr>
         <td class="headerStyle">Path</td>
         <td class="headerStyle">Change</td>
+        <td class="headerStyle">Revision</td>
+        <td class="headerStyle">Author</td>
+        <td class="headerStyle">Date</td>
+        <td class="headerStyle">Comment</td>
     </tr>
     <div th:each="file : ${files}" th:remove="tag">
         <tr>
@@ -52,7 +56,10 @@
                     </a>
                 </div>
             </td>
-            <td class="bodyStyle" align="center" th:text="${file.diffCount}">file.diffCount</td>
+            <td class="bodyStyle" style="text-align: center" th:text="${file.diffCount}">file.diffCount</td>
+            <td class="bodyStyle" style="text-align: center" th:text="${file.devRevision}">file.devRevision</td>
+            <td class="bodyStyle" style="text-align: center" th:text="${file.devAuthor}">file.devAuthor</td>
+            <td class="bodyStyle" style="text-align: center" th:text="${file.devCommitTime}">file.devCommitTime</td>
         </tr>
     </div>
 </table>
