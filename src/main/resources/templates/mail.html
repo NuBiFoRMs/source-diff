@@ -58,8 +58,9 @@
             </td>
             <td class="bodyStyle" style="text-align: center" th:text="${file.diffCount}">file.diffCount</td>
             <td class="bodyStyle" style="text-align: center" th:text="${file.devRevision}">file.devRevision</td>
-            <td class="bodyStyle" style="text-align: center" th:text="${file.devAuthor}">file.devAuthor</td>
-            <td class="bodyStyle" style="text-align: center" th:text="${file.devCommitTime}">file.devCommitTime</td>
+            <td class="bodyStyle" th:text="${file.devAuthor}">file.devAuthor</td>
+            <td class="bodyStyle" th:text="${file.devCommitTime}">file.devCommitTime</td>
+            <td class="bodyStyle" th:text="${file.devMessage}">file.devMessage</td>
         </tr>
     </div>
 </table>
