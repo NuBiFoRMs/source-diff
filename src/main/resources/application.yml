@@ -24,3 +24,7 @@ file-filter:
   prefix:
   postfix:
   contains:
+
+mailing:
+  enabled:
+  host:

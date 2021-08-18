@@ -1,10 +1,5 @@
 package com.nubiform.sourcediff.mail;
 
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.stereotype.Service;
-
-@Service
-@ConditionalOnMissingBean(MailSender.class)
 public class ConsoleMailSender implements MailSender {
 
     @Override
