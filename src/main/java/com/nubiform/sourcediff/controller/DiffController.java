@@ -2,6 +2,7 @@ package com.nubiform.sourcediff.controller;
 
 import com.nubiform.sourcediff.config.AppProperties;
 import com.nubiform.sourcediff.constant.DiffType;
+import com.nubiform.sourcediff.mail.MailMessage;
 import com.nubiform.sourcediff.service.DiffService;
 import com.nubiform.sourcediff.service.DirectoryService;
 import com.nubiform.sourcediff.service.MailService;
@@ -13,10 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
@@ -130,11 +128,21 @@ public class DiffController {
     @ResponseBody
     @GetMapping("/mailing")
     public String mailing() {
+        log.info("request: {}", "/mailing");
+
         appProperties.getRepositories()
                 .stream()
                 .map(AppProperties.RepositoryProperties::getName)
                 .forEach(mailService::mailing);
-        
+
+        return "SUCCESS";
+    }
+
+    @ResponseBody
+    @PostMapping("/mail")
+    public String mail(@RequestBody MailMessage mailMessage) {
+        log.info("request: {}, to: {}, subject: {}", "/mail", mailMessage.getTo(), mailMessage.getSubject());
+        log.debug("message\n{}", mailMessage.getMessage());
         return "SUCCESS";
     }
 }
