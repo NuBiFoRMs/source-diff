@@ -39,6 +39,7 @@ public class FileEntity {
 
     private String devRevision;
 
+    @Column(length = 500)
     private String devMessage;
 
     private LocalDateTime devCommitTime;
@@ -51,6 +52,7 @@ public class FileEntity {
 
     private String prodRevision;
 
+    @Column(length = 500)
     private String prodMessage;
 
     private LocalDateTime prodCommitTime;
@@ -60,4 +62,6 @@ public class FileEntity {
     private Integer diffCount;
 
     private LocalDateTime scanModified;
+
+    private LocalDateTime infoModified;
 }

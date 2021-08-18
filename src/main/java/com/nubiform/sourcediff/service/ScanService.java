@@ -134,7 +134,6 @@ public class ScanService {
                         (Objects.nonNull(file.getDevFilePath()) && file.getScanModified().isBefore(file.getDevModified())) ||
                         (Objects.nonNull(file.getProdFilePath()) && file.getScanModified().isBefore(file.getProdModified()))) {
 
-                    // diff.
                     if (Objects.nonNull(file.getDevFilePath()) && Objects.nonNull(file.getProdFilePath())) {
                         int diffSize = 0;
                         try {
@@ -146,25 +145,6 @@ public class ScanService {
                     } else {
                         file.setDiffCount(0);
                     }
-
-                    // svn info.
-                    if (Objects.nonNull(file.getDevFilePath())) {
-                        Map<String, Object> svnInfo = svnConnector.log(new File(file.getDevFilePath()));
-                        log.debug("svnInfo: {}", svnInfo);
-                        file.setDevRevision((String) svnInfo.get("revision"));
-                        file.setDevMessage((String) svnInfo.get("msg"));
-                        file.setDevCommitTime((LocalDateTime) svnInfo.get("date"));
-                        file.setDevAuthor((String) svnInfo.get("author"));
-                    }
-                    if (Objects.nonNull(file.getProdFilePath())) {
-                        Map<String, Object> svnInfo = svnConnector.log(new File(file.getProdFilePath()));
-                        log.debug("svnInfo: {}", svnInfo);
-                        file.setProdRevision((String) svnInfo.get("revision"));
-                        file.setProdMessage((String) svnInfo.get("msg"));
-                        file.setProdCommitTime((LocalDateTime) svnInfo.get("date"));
-                        file.setProdAuthor((String) svnInfo.get("author"));
-                    }
-
 
                     file.setScanModified(LocalDateTime.now());
                     fileRepository.save(file);
