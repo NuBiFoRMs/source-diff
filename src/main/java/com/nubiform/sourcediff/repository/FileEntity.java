@@ -60,4 +60,6 @@ public class FileEntity {
     private Integer diffCount;
 
     private LocalDateTime scanModified;
+
+    private LocalDateTime infoModified;
 }
