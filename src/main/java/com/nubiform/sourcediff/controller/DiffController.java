@@ -2,7 +2,9 @@ package com.nubiform.sourcediff.controller;
 
 import com.nubiform.sourcediff.config.AppProperties;
 import com.nubiform.sourcediff.constant.DiffType;
+import com.nubiform.sourcediff.constant.FileType;
 import com.nubiform.sourcediff.mail.MailMessage;
+import com.nubiform.sourcediff.repository.FileRepository;
 import com.nubiform.sourcediff.service.DiffService;
 import com.nubiform.sourcediff.service.DirectoryService;
 import com.nubiform.sourcediff.service.MailService;
@@ -12,6 +14,8 @@ import com.nubiform.sourcediff.vo.FileResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -19,6 +23,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -38,6 +43,10 @@ public class DiffController {
     private final DirectoryService directoryService;
     private final DiffService diffService;
     private final MailService mailService;
+
+    private final FileRepository fileRepository;
+
+    private final ModelMapper modelMapper;
 
     @GetMapping(HOME_URI)
     public String home(Model model) {
@@ -143,5 +152,24 @@ public class DiffController {
         log.info("request: {}, to: {}, subject: {}", "/mail", mailMessage.getTo(), mailMessage.getSubject());
         log.debug("message\n{}", mailMessage.getMessage());
         return "SUCCESS";
+    }
+
+    @GetMapping("/mailing-test/{repository}")
+    public String mailingTest(@PathVariable String repository, Model model) {
+        List<FileResponse> files = fileRepository.findAllByFilePathStartsWith(PathUtils.SEPARATOR + repository, Sort.by("filePath", "fileType"))
+                .stream()
+                .filter(file -> file.getDiffCount() > 0 || Objects.isNull(file.getDevFilePath()) || Objects.isNull(file.getProdFilePath()))
+                .filter(file -> FileType.FILE.equals(file.getFileType()))
+                .map(fileEntity -> {
+                    FileResponse fileResponse = modelMapper.map(fileEntity, FileResponse.class);
+                    fileResponse.setFilePathDisplay(fileResponse.getFilePath());
+                    return fileResponse;
+                })
+                .collect(Collectors.toList());
+
+        model.addAttribute("host", appProperties.getHost());
+        model.addAttribute("files", files);
+
+        return "mail";
     }
 }

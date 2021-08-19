@@ -38,6 +38,7 @@
 <table class="tableStyle">
     <tr>
         <td class="headerStyle">Path</td>
+        <td class="headerStyle">Note</td>
         <td class="headerStyle">Change</td>
         <td class="headerStyle">Revision</td>
         <td class="headerStyle">Author</td>
@@ -58,11 +59,12 @@
                     </a>
                 </div>
             </td>
+            <td class="bodyStyle" th:text="${file.note}">file.note</td>
             <td class="bodyStyle" style="text-align: center" th:text="${file.diffCount}">file.diffCount</td>
-            <td class="bodyStyle" style="text-align: center" th:text="${file.devRevision}">file.devRevision</td>
-            <td class="bodyStyle" th:text="${file.devAuthor}">file.devAuthor</td>
-            <td class="bodyStyle" th:text="${file.devCommitTime}">file.devCommitTime</td>
-            <td class="bodyStyle" th:text="${file.devMessage}">file.devMessage</td>
+            <td class="bodyStyle" style="text-align: center" th:text="${file.revision}">file.revision</td>
+            <td class="bodyStyle" th:text="${file.author}">file.author</td>
+            <td class="bodyStyle" th:text="${file.commitTime}">file.commitTime</td>
+            <td class="bodyStyle" th:text="${file.message}">file.message</td>
         </tr>
     </div>
 </table>

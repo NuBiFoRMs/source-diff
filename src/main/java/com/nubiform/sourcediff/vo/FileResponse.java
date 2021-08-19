@@ -57,11 +57,34 @@ public class FileResponse {
         return Objects.isNull(devFilePath) && Objects.nonNull(prodFilePath);
     }
 
-    public String getDevCommitTime() {
-        return Objects.nonNull(this.devCommitTime) ? this.devCommitTime.format(DateTimeFormatter.ISO_DATE) : null;
+    public String getNote() {
+        if (Objects.isNull(devFilePath))
+            return "Prod.";
+        else if (Objects.isNull(prodFilePath))
+            return "Dev.";
+        else
+            return null;
     }
 
-    public String getProdCommitTime() {
-        return Objects.nonNull(this.prodCommitTime) ? this.prodCommitTime.format(DateTimeFormatter.ISO_DATE) : null;
+    public String getRevision() {
+        if (Objects.isNull(devFilePath)) return prodRevision;
+        else return devRevision;
+    }
+
+    public String getAuthor() {
+        if (Objects.isNull(devFilePath)) return prodAuthor;
+        else return devAuthor;
+    }
+
+    public String getCommitTime() {
+        if (Objects.isNull(devFilePath))
+            return Objects.nonNull(this.prodCommitTime) ? this.prodCommitTime.format(DateTimeFormatter.ISO_DATE) : null;
+        else
+            return Objects.nonNull(this.devCommitTime) ? this.devCommitTime.format(DateTimeFormatter.ISO_DATE) : null;
+    }
+
+    public String getMessage() {
+        if (Objects.isNull(devFilePath)) return prodMessage;
+        else return devMessage;
     }
 }
