@@ -123,10 +123,7 @@ public class ScanService {
             if (FileType.DIRECTORY.equals(file.getFileType())) {
                 count += detailScan(file.getFilePath());
             } else {
-                if (Objects.isNull(file.getScanModified()) ||
-                        (Objects.nonNull(file.getDevFilePath()) && file.getScanModified().isBefore(file.getDevModified())) ||
-                        (Objects.nonNull(file.getProdFilePath()) && file.getScanModified().isBefore(file.getProdModified()))) {
-
+                if (file.needToScan()) {
                     if (Objects.nonNull(file.getDevFilePath()) && Objects.nonNull(file.getProdFilePath())) {
                         int diffSize = 0;
                         try {
@@ -177,11 +174,7 @@ public class ScanService {
 
     @Transactional
     public FileEntity updateSvnInfo(FileEntity file) {
-        if (Objects.isNull(file.getInfoModified()) ||
-                (Objects.nonNull(file.getDevFilePath()) && file.getInfoModified().isBefore(file.getDevModified())) ||
-                (Objects.nonNull(file.getProdFilePath()) && file.getInfoModified().isBefore(file.getProdModified()))) {
-
-            // svn info.
+        if (file.needToUpdateSvnInfo()) {
             if (Objects.nonNull(file.getDevFilePath())) {
                 Map<String, Object> svnInfo = svnConnector.log(new File(file.getDevFilePath()));
                 log.debug("svnInfo: {}", svnInfo);
