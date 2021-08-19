@@ -58,10 +58,10 @@ public class FileResponse {
     }
 
     public String getDevCommitTime() {
-        return this.devCommitTime.format(DateTimeFormatter.ISO_DATE);
+        return Objects.nonNull(this.devCommitTime) ? this.devCommitTime.format(DateTimeFormatter.ISO_DATE) : null;
     }
 
     public String getProdCommitTime() {
-        return this.prodCommitTime.format(DateTimeFormatter.ISO_DATE);
+        return Objects.nonNull(this.prodCommitTime) ? this.prodCommitTime.format(DateTimeFormatter.ISO_DATE) : null;
     }
 }

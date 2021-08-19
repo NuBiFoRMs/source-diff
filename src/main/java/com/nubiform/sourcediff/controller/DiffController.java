@@ -125,7 +125,6 @@ public class DiffController {
             return "view";
     }
 
-    @ResponseBody
     @GetMapping("/mailing")
     public String mailing() {
         log.info("request: {}", "/mailing");
@@ -135,7 +134,7 @@ public class DiffController {
                 .map(AppProperties.RepositoryProperties::getName)
                 .forEach(mailService::mailing);
 
-        return "SUCCESS";
+        return "mail-success";
     }
 
     @ResponseBody

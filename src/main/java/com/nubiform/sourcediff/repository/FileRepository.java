@@ -25,7 +25,7 @@ public interface FileRepository extends JpaRepository<FileEntity, Long> {
     List<FileEntity> findAllByFilePathStartsWith(String filePath, Sort sort);
 
     @Modifying
-    @Query("select f from FileEntity f where f.infoModified is null or (f.devModified is not null and f.infoModified < f.devModified) or (f.prodModified is not null and f.infoModified < f.prodModified)")
+    @Query("select f from FileEntity f where f.infoModified is null or (f.devModified is not null and f.infoModified < f.devModified) or (f.prodModified is not null and f.infoModified < f.prodModified) order by f.devModified desc")
     List<FileEntity> findAllForUpdateSvnInfo();
 
     @Modifying
