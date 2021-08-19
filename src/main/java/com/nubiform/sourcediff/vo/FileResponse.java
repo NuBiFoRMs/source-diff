@@ -2,6 +2,8 @@ package com.nubiform.sourcediff.vo;
 
 import lombok.Data;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Objects;
 
 @Data
@@ -23,7 +25,23 @@ public class FileResponse {
 
     private String devFilePath;
 
+    private String devRevision;
+
+    private String devMessage;
+
+    private LocalDateTime devCommitTime;
+
+    private String devAuthor;
+
     private String prodFilePath;
+
+    private String prodRevision;
+
+    private String prodMessage;
+
+    private LocalDateTime prodCommitTime;
+
+    private String prodAuthor;
 
     private Integer diffCount = 0;
 
@@ -37,5 +55,13 @@ public class FileResponse {
 
     public boolean isProdOnly() {
         return Objects.isNull(devFilePath) && Objects.nonNull(prodFilePath);
+    }
+
+    public String getDevCommitTime() {
+        return this.devCommitTime.format(DateTimeFormatter.ISO_DATE);
+    }
+
+    public String getProdCommitTime() {
+        return this.prodCommitTime.format(DateTimeFormatter.ISO_DATE);
     }
 }

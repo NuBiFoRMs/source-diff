@@ -26,5 +26,5 @@ file-filter:
   contains:
 
 mailing:
-  enabled:
+  enabled: false
   host:
