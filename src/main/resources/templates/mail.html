@@ -49,18 +49,18 @@
         <tr>
             <td class="bodyStyle">
                 <div th:if="${#strings.equals(file.fileType, 'D')}" th:remove="tag">
-                    <a th:href="@{{host}/explorer{path}(host=${host}, path=${file.filePath})}" th:text="${file.filePath}">
+                    <a th:href="@{{host}/explorer{path}(host=${host}, path=${file.filePath})}" th:text="${file.getMailingFilePath()}">
                         file.filePath
                     </a>
                 </div>
                 <div th:if="${#strings.equals(file.fileType, 'F')}" th:remove="tag">
-                    <a th:href="@{{host}/view{path}(host=${host}, path=${file.filePath})}" th:text="${file.filePath}">
+                    <a th:href="@{{host}/view{path}(host=${host}, path=${file.filePath})}" th:text="${file.getMailingFilePath()}">
                         file.filePath
                     </a>
                 </div>
             </td>
             <td class="bodyStyle" th:text="${file.note}">file.note</td>
-            <td class="bodyStyle" style="text-align: center" th:text="${file.diffCount}">file.diffCount</td>
+            <td class="bodyStyle" style="text-align: center" th:text="${file.getMailingDiffCount()}">file.diffCount</td>
             <td class="bodyStyle" style="text-align: center" th:text="${file.revision}">file.revision</td>
             <td class="bodyStyle" th:text="${file.author}">file.author</td>
             <td class="bodyStyle" th:text="${file.commitTime}">file.commitTime</td>

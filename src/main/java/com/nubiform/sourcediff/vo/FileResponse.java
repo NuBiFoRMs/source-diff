@@ -1,5 +1,6 @@
 package com.nubiform.sourcediff.vo;
 
+import com.nubiform.sourcediff.util.PathUtils;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -57,6 +58,17 @@ public class FileResponse {
         return Objects.isNull(devFilePath) && Objects.nonNull(prodFilePath);
     }
 
+    public String getMailingFilePath() {
+        return PathUtils.removePrefix(this.filePath, this.repository);
+    }
+
+    public String getMailingDiffCount() {
+        if (diffCount == 0)
+            return null;
+        else
+            return String.valueOf(diffCount);
+    }
+
     public String getNote() {
         if (Objects.isNull(devFilePath))
             return "Prod.";
@@ -67,13 +79,17 @@ public class FileResponse {
     }
 
     public String getRevision() {
-        if (Objects.isNull(devFilePath)) return prodRevision;
-        else return devRevision;
+        if (Objects.isNull(devFilePath))
+            return prodRevision;
+        else
+            return devRevision;
     }
 
     public String getAuthor() {
-        if (Objects.isNull(devFilePath)) return prodAuthor;
-        else return devAuthor;
+        if (Objects.isNull(devFilePath))
+            return prodAuthor;
+        else
+            return devAuthor;
     }
 
     public String getCommitTime() {
@@ -84,7 +100,9 @@ public class FileResponse {
     }
 
     public String getMessage() {
-        if (Objects.isNull(devFilePath)) return prodMessage;
-        else return devMessage;
+        if (Objects.isNull(devFilePath))
+            return prodMessage;
+        else
+            return devMessage;
     }
 }
