@@ -9,6 +9,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.util.Comparator;
+import java.util.stream.Collectors;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -30,11 +31,12 @@ public class BatchService {
 
     @Scheduled(fixedDelay = 5000)
     public void svnInfo() {
-        fileRepository.findAll()
-                .parallelStream()
-                .filter(FileEntity::needToUpdateSvnInfo)
+        fileRepository.findAllForUpdateSvnInfo()
+                .stream()
                 .sorted(Comparator.comparing(FileEntity::getDevModified).reversed())
                 .limit(20)
+                .collect(Collectors.toList())
+                .parallelStream()
                 .forEach(scanService::updateSvnInfo);
     }
 }

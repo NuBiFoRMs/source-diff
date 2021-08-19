@@ -174,6 +174,7 @@ public class ScanService {
 
     @Transactional
     public FileEntity updateSvnInfo(FileEntity file) {
+        log.info("updateSvnInfo: {}", file.getFilePath());
         if (file.needToUpdateSvnInfo()) {
             if (Objects.nonNull(file.getDevFilePath())) {
                 Map<String, Object> svnInfo = svnConnector.log(new File(file.getDevFilePath()));
