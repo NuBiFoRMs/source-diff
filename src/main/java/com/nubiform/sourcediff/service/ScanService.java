@@ -60,18 +60,20 @@ public class ScanService {
             svnConnector.checkout(repositoryProperties.getProdUrl(), "HEAD", prodPath, repositoryProperties.getProdUsername(), repositoryProperties.getProdPassword());
         }
 
-        log.debug("clean cache");
-        fileRepository.cleanByRepository(repositoryProperties.getName());
+        if (devUpdate || prodUpdate || !fileRepository.existsByRepository(repositoryProperties.getName())) {
+            log.debug("clean cache");
+            fileRepository.cleanByRepository(repositoryProperties.getName());
 
-        log.debug("scan directory");
-        directoryScan(repositoryProperties.getName(), SourceType.DEV, devPath);
-        directoryScan(repositoryProperties.getName(), SourceType.PROD, prodPath);
+            log.debug("scan directory");
+            directoryScan(repositoryProperties.getName(), SourceType.DEV, devPath);
+            directoryScan(repositoryProperties.getName(), SourceType.PROD, prodPath);
 
-        log.debug("clean deleted file");
-        fileRepository.deleteByRepository(repositoryProperties.getName());
+            log.debug("clean deleted file");
+            fileRepository.deleteByRepository(repositoryProperties.getName());
 
-        log.debug("scan init diff");
-        detailScan(PathUtils.SEPARATOR + repositoryProperties.getName());
+            log.debug("scan init diff");
+            detailScan(PathUtils.SEPARATOR + repositoryProperties.getName());
+        }
 
         log.info("finish scan: {}", repositoryProperties.getName());
     }
