@@ -46,9 +46,19 @@ public class ScanService {
         File devPath = new File(repositoryProperties.getName() + PathUtils.SEPARATOR + SourceType.DEV);
         File prodPath = new File(repositoryProperties.getName() + PathUtils.SEPARATOR + SourceType.PROD);
 
-        log.debug("svn checkout");
-        svnConnector.checkout(repositoryProperties.getDevUrl(), "HEAD", devPath, repositoryProperties.getDevUsername(), repositoryProperties.getDevPassword());
-        svnConnector.checkout(repositoryProperties.getProdUrl(), "HEAD", prodPath, repositoryProperties.getProdUsername(), repositoryProperties.getProdPassword());
+        log.debug("svn checkUpdate");
+        boolean devUpdate = checkUpdate(repositoryProperties.getDevUrl(), devPath, repositoryProperties.getDevUsername(), repositoryProperties.getDevPassword());
+        boolean prodUpdate = checkUpdate(repositoryProperties.getProdUrl(), prodPath, repositoryProperties.getProdUsername(), repositoryProperties.getProdPassword());
+
+        if (devUpdate) {
+            log.debug("svn checkout dev");
+            svnConnector.checkout(repositoryProperties.getDevUrl(), "HEAD", devPath, repositoryProperties.getDevUsername(), repositoryProperties.getDevPassword());
+        }
+
+        if (prodUpdate) {
+            log.debug("svn checkout prod");
+            svnConnector.checkout(repositoryProperties.getProdUrl(), "HEAD", prodPath, repositoryProperties.getProdUsername(), repositoryProperties.getProdPassword());
+        }
 
         log.debug("clean cache");
         fileRepository.cleanByRepository(repositoryProperties.getName());
@@ -64,6 +74,12 @@ public class ScanService {
         detailScan(PathUtils.SEPARATOR + repositoryProperties.getName());
 
         log.info("finish scan: {}", repositoryProperties.getName());
+    }
+
+    private boolean checkUpdate(String url, File location, String username, String password) {
+        long localRevision = svnConnector.revisionLog(location);
+        long serverRevision = svnConnector.revisionLog(url, username, password);
+        return localRevision < serverRevision;
     }
 
     private void directoryScan(String repository, SourceType sourceType, File baseDirectory) {
