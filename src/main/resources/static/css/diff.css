@@ -49,8 +49,9 @@
     background-color: linen;
 }
 
-.skip {
-    height: 100px;
+.trSkip {
+    background-color: aliceblue;
+    height: 50px;
 }
 
 .source {

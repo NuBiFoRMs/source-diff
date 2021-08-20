@@ -18,6 +18,4 @@ public class DiffResponse {
     private String newSource;
 
     private boolean visible = false;
-
-    private boolean skip = false;
 }
