@@ -71,9 +71,9 @@ public class FileResponse {
 
     public String getNote() {
         if (Objects.isNull(devFilePath))
-            return "Prod.";
+            return "Prod";
         else if (Objects.isNull(prodFilePath))
-            return "Dev.";
+            return "Dev";
         else
             return null;
     }
