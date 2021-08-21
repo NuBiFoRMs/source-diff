@@ -7,4 +7,8 @@ public interface SvnConnector {
     void checkout(String url, String revision, File location, String username, String password);
 
     Map<String, Object> log(File location);
+
+    long revisionLog(String url, String username, String password);
+
+    long revisionLog(File location);
 }

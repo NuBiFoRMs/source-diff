@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -64,4 +65,16 @@ public class FileEntity {
     private LocalDateTime scanModified;
 
     private LocalDateTime infoModified;
+
+    public boolean needToScan() {
+        return Objects.isNull(this.scanModified) ||
+                (Objects.nonNull(this.devFilePath) && this.scanModified.isBefore(this.devModified)) ||
+                (Objects.nonNull(this.prodFilePath) && this.scanModified.isBefore(this.prodModified));
+    }
+
+    public boolean needToUpdateSvnInfo() {
+        return Objects.isNull(this.infoModified) ||
+                (Objects.nonNull(this.devFilePath) && this.infoModified.isBefore(this.devModified)) ||
+                (Objects.nonNull(this.prodFilePath) && this.infoModified.isBefore(this.prodModified));
+    }
 }

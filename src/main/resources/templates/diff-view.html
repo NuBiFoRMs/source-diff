@@ -29,10 +29,6 @@
                             th:style="${row.visible ? 'display:block' : 'display:none'}">
                             <td class="text-muted" th:text="${row.newLine}">row.newLine</td>
                         </tr>
-                        <tr class="skip d-flex justify-content-end"
-                            th:id="${row.line}" th:if="${row.skip}">
-                            <td class="text-muted"></td>
-                        </tr>
                     </div>
                 </table>
             </div>
@@ -43,12 +39,8 @@
                         <tr class="source"
                             th:id="${row.line}" th:if="${row.visible}"
                             th:style="${row.visible ? 'display:block' : 'display:none'}"
-                            th:classappend="${row.changeType.equals('C') ? 'trCreate' : row.changeType.equals('U') ? 'trUpdate' : row.changeType.equals('D') ? 'trDelete' : ''}">
+                            th:classappend="${row.changeType.equals('C') ? 'trCreate' : row.changeType.equals('U') ? 'trUpdate' : row.changeType.equals('D') ? 'trDelete' : row.changeType.equals('S') ? 'trSkip text-muted' : ''}">
                             <td th:utext="${row.newSource}" style="white-space: pre" nowrap>row.newSource</td>
-                        </tr>
-                        <tr class="skip"
-                            th:id="${row.line}" th:if="${row.skip}">
-                            <td align="center" class="text-muted">...</td>
                         </tr>
                     </div>
                 </table>
@@ -64,10 +56,6 @@
                             th:style="${row.visible ? 'display:block' : 'display:none'}">
                             <td class="text-muted" th:text="${row.oldLine}">row.oldLine</td>
                         </tr>
-                        <tr class="skip d-flex justify-content-end"
-                            th:id="${row.line}" th:if="${row.skip}">
-                            <td class="text-muted"></td>
-                        </tr>
                     </div>
                 </table>
             </div>
@@ -78,12 +66,8 @@
                         <tr class="source"
                             th:id="${row.line}" th:if="${row.visible}"
                             th:style="${row.visible ? 'display:block' : 'display:none'}"
-                            th:classappend="${row.changeType.equals('C') ? 'trCreate' : row.changeType.equals('U') ? 'trUpdate' : row.changeType.equals('D') ? 'trDelete' : ''}">
+                            th:classappend="${row.changeType.equals('C') ? 'trCreate' : row.changeType.equals('U') ? 'trUpdate' : row.changeType.equals('D') ? 'trDelete' : row.changeType.equals('S') ? 'trSkip text-muted' : ''}">
                             <td th:utext="${row.oldSource}" style="white-space: pre" nowrap>row.oldSource</td>
-                        </tr>
-                        <tr class="skip"
-                            th:id="${row.line}" th:if="${row.skip}">
-                            <td align="center" class="text-muted">...</td>
                         </tr>
                     </div>
                 </table>

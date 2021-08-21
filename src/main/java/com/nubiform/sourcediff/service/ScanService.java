@@ -46,24 +46,42 @@ public class ScanService {
         File devPath = new File(repositoryProperties.getName() + PathUtils.SEPARATOR + SourceType.DEV);
         File prodPath = new File(repositoryProperties.getName() + PathUtils.SEPARATOR + SourceType.PROD);
 
-        log.debug("svn checkout");
-        svnConnector.checkout(repositoryProperties.getDevUrl(), "HEAD", devPath, repositoryProperties.getDevUsername(), repositoryProperties.getDevPassword());
-        svnConnector.checkout(repositoryProperties.getProdUrl(), "HEAD", prodPath, repositoryProperties.getProdUsername(), repositoryProperties.getProdPassword());
+        log.debug("svn checkUpdate");
+        boolean devUpdate = checkUpdate(repositoryProperties.getDevUrl(), devPath, repositoryProperties.getDevUsername(), repositoryProperties.getDevPassword());
+        boolean prodUpdate = checkUpdate(repositoryProperties.getProdUrl(), prodPath, repositoryProperties.getProdUsername(), repositoryProperties.getProdPassword());
 
-        log.debug("clean cache");
-        fileRepository.cleanByRepository(repositoryProperties.getName());
+        if (devUpdate) {
+            log.debug("svn checkout dev");
+            svnConnector.checkout(repositoryProperties.getDevUrl(), "HEAD", devPath, repositoryProperties.getDevUsername(), repositoryProperties.getDevPassword());
+        }
 
-        log.debug("scan directory");
-        directoryScan(repositoryProperties.getName(), SourceType.DEV, devPath);
-        directoryScan(repositoryProperties.getName(), SourceType.PROD, prodPath);
+        if (prodUpdate) {
+            log.debug("svn checkout prod");
+            svnConnector.checkout(repositoryProperties.getProdUrl(), "HEAD", prodPath, repositoryProperties.getProdUsername(), repositoryProperties.getProdPassword());
+        }
 
-        log.debug("clean deleted file");
-        fileRepository.deleteByRepository(repositoryProperties.getName());
+        if (devUpdate || prodUpdate || !fileRepository.existsByRepository(repositoryProperties.getName())) {
+            log.debug("clean cache");
+            fileRepository.cleanByRepository(repositoryProperties.getName());
 
-        log.debug("scan init diff");
-        detailScan(PathUtils.SEPARATOR + repositoryProperties.getName());
+            log.debug("scan directory");
+            directoryScan(repositoryProperties.getName(), SourceType.DEV, devPath);
+            directoryScan(repositoryProperties.getName(), SourceType.PROD, prodPath);
+
+            log.debug("clean deleted file");
+            fileRepository.deleteByRepository(repositoryProperties.getName());
+
+            log.debug("scan init diff");
+            detailScan(PathUtils.SEPARATOR + repositoryProperties.getName());
+        }
 
         log.info("finish scan: {}", repositoryProperties.getName());
+    }
+
+    private boolean checkUpdate(String url, File location, String username, String password) {
+        long localRevision = svnConnector.revisionLog(location);
+        long serverRevision = svnConnector.revisionLog(url, username, password);
+        return localRevision < serverRevision;
     }
 
     private void directoryScan(String repository, SourceType sourceType, File baseDirectory) {
@@ -123,10 +141,7 @@ public class ScanService {
             if (FileType.DIRECTORY.equals(file.getFileType())) {
                 count += detailScan(file.getFilePath());
             } else {
-                if (Objects.isNull(file.getScanModified()) ||
-                        (Objects.nonNull(file.getDevFilePath()) && file.getScanModified().isBefore(file.getDevModified())) ||
-                        (Objects.nonNull(file.getProdFilePath()) && file.getScanModified().isBefore(file.getProdModified()))) {
-
+                if (file.needToScan()) {
                     if (Objects.nonNull(file.getDevFilePath()) && Objects.nonNull(file.getProdFilePath())) {
                         int diffSize = 0;
                         try {
@@ -177,11 +192,8 @@ public class ScanService {
 
     @Transactional
     public FileEntity updateSvnInfo(FileEntity file) {
-        if (Objects.isNull(file.getInfoModified()) ||
-                (Objects.nonNull(file.getDevFilePath()) && file.getInfoModified().isBefore(file.getDevModified())) ||
-                (Objects.nonNull(file.getProdFilePath()) && file.getInfoModified().isBefore(file.getProdModified()))) {
-
-            // svn info.
+        log.info("updateSvnInfo: {}", file.getFilePath());
+        if (file.needToUpdateSvnInfo()) {
             if (Objects.nonNull(file.getDevFilePath())) {
                 Map<String, Object> svnInfo = svnConnector.log(new File(file.getDevFilePath()));
                 log.debug("svnInfo: {}", svnInfo);

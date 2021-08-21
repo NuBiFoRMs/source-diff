@@ -91,7 +91,7 @@ public class DiffService {
             diffResponseList.add(diffResponse);
         }
 
-        return setSkip(setVisible(diffResponseList));
+        return setTest(setVisible(diffResponseList));
     }
 
     private List<DiffResponse> setVisible(List<DiffResponse> diffResponseList) {
@@ -124,20 +124,46 @@ public class DiffService {
         return diffResponseList;
     }
 
-    private List<DiffResponse> setSkip(List<DiffResponse> diffResponseList) {
-        for (int i = 0; i < diffResponseList.size() - 1; i++) {
-            DiffResponse current = diffResponseList.get(i);
-            DiffResponse next = diffResponseList.get(i + 1);
+    private List<DiffResponse> setTest(List<DiffResponse> diffResponseList) {
+        int line = Integer.MAX_VALUE;
+        int oldLine = Integer.MAX_VALUE;
+        int newLine = Integer.MAX_VALUE;
 
-            if (current.isVisible() != next.isVisible()) {
-                if (current.isVisible()) {
-                    next.setSkip(true);
-                } else {
-                    current.setSkip(true);
+        List<DiffResponse> result = new ArrayList<>();
+        for (int i = 0; i < diffResponseList.size(); i++) {
+            DiffResponse diffResponse = diffResponseList.get(i);
+
+            if (diffResponse.isVisible()) {
+                if (line < Integer.MAX_VALUE) {
+                    DiffResponse skipResponse = new DiffResponse();
+                    skipResponse.setChangeType("S");
+                    skipResponse.setOldSource(String.format("[%d - %d]", oldLine, diffResponse.getOldLine() - 1));
+                    skipResponse.setNewSource(String.format("[%d - %d]", newLine, diffResponse.getNewLine() - 1));
+                    skipResponse.setVisible(true);
+                    result.add(skipResponse);
                 }
+
+                result.add(diffResponse);
+
+                line = Integer.MAX_VALUE;
+                oldLine = Integer.MAX_VALUE;
+                newLine = Integer.MAX_VALUE;
+            } else {
+                line = Math.min(diffResponse.getLine(), line);
+                oldLine = Math.min(diffResponse.getOldLine(), oldLine);
+                newLine = Math.min(diffResponse.getNewLine(), newLine);
             }
         }
 
-        return diffResponseList;
+        if (line < Integer.MAX_VALUE) {
+            DiffResponse skipResponse = new DiffResponse();
+            skipResponse.setChangeType("S");
+            skipResponse.setOldSource(String.format("[%d - %d]", oldLine, diffResponseList.get(diffResponseList.size() - 1).getOldLine() - 1));
+            skipResponse.setNewSource(String.format("[%d - %d]", newLine, diffResponseList.get(diffResponseList.size() - 1).getNewLine() - 1));
+            skipResponse.setVisible(true);
+            result.add(skipResponse);
+        }
+
+        return result;
     }
 }

@@ -12,6 +12,8 @@ public interface FileRepository extends JpaRepository<FileEntity, Long> {
 
     List<FileEntity> findAllByParentIdIsNull();
 
+    boolean existsByRepository(String repository);
+
     Optional<FileEntity> findByFilePath(String filePath);
 
     Optional<FileEntity> findByFilePathAndFileType(String filePath, String fileType);
@@ -20,9 +22,11 @@ public interface FileRepository extends JpaRepository<FileEntity, Long> {
 
     List<FileEntity> findAllByParentId(Long parentId, Sort sort);
 
-    List<FileEntity> findAllByFilePathStartsWith(String filePath);
-
     List<FileEntity> findAllByFilePathStartsWith(String filePath, Sort sort);
+
+    @Modifying
+    @Query("select f from FileEntity f where f.infoModified is null or (f.devModified is not null and f.infoModified < f.devModified) or (f.prodModified is not null and f.infoModified < f.prodModified) order by f.devModified desc")
+    List<FileEntity> findAllForUpdateSvnInfo();
 
     @Modifying
     @Query("update FileEntity f set f.devFilePath = null, f.devModified = null, f.prodFilePath = null, f.prodModified = null where f.repository = :repository")
