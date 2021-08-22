@@ -90,6 +90,11 @@
             <artifactId>modelmapper</artifactId>
             <version>2.4.4</version>
         </dependency>
+        <dependency>
+            <groupId>org.tmatesoft.svnkit</groupId>
+            <artifactId>svnkit</artifactId>
+            <version>1.10.3</version>
+        </dependency>
     </dependencies>
 
     <build>
