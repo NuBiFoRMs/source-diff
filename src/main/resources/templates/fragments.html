@@ -35,9 +35,9 @@
                         Repositories
                     </a>
                     <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-                        <div th:each="repository : ${repositories}" th:remove="tag">
+                        <th:block th:each="repository : ${repositories}">
                             <li><a class="dropdown-item" th:href="@{/explorer/{path}(path=${repository.name})}" th:text="${repository.name}">repository.name</a></li>
-                        </div>
+                        </th:block>
                     </ul>
                 </li>
             </ul>
