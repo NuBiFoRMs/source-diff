@@ -30,7 +30,7 @@ public class DiffService {
 
     private final FileRepository fileRepository;
 
-    public List<DiffResponse> diff(String path) throws IOException {
+    public List<DiffResponse> getDiff(String path) throws IOException {
         FileEntity fileEntity = fileRepository.findByFilePathAndFileType(path, FileType.FILE)
                 .orElseThrow(RuntimeException::new);
 
@@ -91,7 +91,11 @@ public class DiffService {
             diffResponseList.add(diffResponse);
         }
 
-        return setTest(setVisible(diffResponseList));
+        return diffResponseList;
+    }
+
+    public List<DiffResponse> setDiffView(List<DiffResponse> diffResponseList) {
+        return setSkip(setVisible(diffResponseList));
     }
 
     private List<DiffResponse> setVisible(List<DiffResponse> diffResponseList) {
@@ -124,7 +128,8 @@ public class DiffService {
         return diffResponseList;
     }
 
-    private List<DiffResponse> setTest(List<DiffResponse> diffResponseList) {
+    private List<DiffResponse> setSkip(List<DiffResponse> diffResponseList) {
+        int keyLine = 1;
         int line = Integer.MAX_VALUE;
         int oldLine = Integer.MAX_VALUE;
         int newLine = Integer.MAX_VALUE;
@@ -136,13 +141,15 @@ public class DiffService {
             if (diffResponse.isVisible()) {
                 if (line < Integer.MAX_VALUE) {
                     DiffResponse skipResponse = new DiffResponse();
-                    skipResponse.setChangeType("S");
+                    skipResponse.setChangeType(DiffType.SKIP);
+                    skipResponse.setLine(keyLine++);
                     skipResponse.setOldSource(String.format("[%d - %d]", oldLine, diffResponse.getOldLine() - 1));
                     skipResponse.setNewSource(String.format("[%d - %d]", newLine, diffResponse.getNewLine() - 1));
                     skipResponse.setVisible(true);
                     result.add(skipResponse);
                 }
 
+                diffResponse.setLine(keyLine++);
                 result.add(diffResponse);
 
                 line = Integer.MAX_VALUE;
@@ -157,13 +164,32 @@ public class DiffService {
 
         if (line < Integer.MAX_VALUE) {
             DiffResponse skipResponse = new DiffResponse();
-            skipResponse.setChangeType("S");
+            skipResponse.setChangeType(DiffType.SKIP);
             skipResponse.setOldSource(String.format("[%d - %d]", oldLine, diffResponseList.get(diffResponseList.size() - 1).getOldLine() - 1));
             skipResponse.setNewSource(String.format("[%d - %d]", newLine, diffResponseList.get(diffResponseList.size() - 1).getNewLine() - 1));
             skipResponse.setVisible(true);
             result.add(skipResponse);
         }
 
+        return result;
+    }
+
+    public List<Integer> getDiffList(List<DiffResponse> diffResponseList) {
+        List<Integer> result = new ArrayList<>();
+        for (int i = 0; i < diffResponseList.size() - 1; i++) {
+            DiffResponse current = diffResponseList.get(i);
+            DiffResponse next = diffResponseList.get(i + 1);
+
+            if (i == 0 &&
+                    !DiffType.EQUAL.equals(current.getChangeType()) && !DiffType.SKIP.equals(current.getChangeType())) {
+                result.add(current.getLine());
+            }
+
+            if (current.getChangeType() != next.getChangeType() &&
+                    (!DiffType.EQUAL.equals(next.getChangeType()) && !DiffType.SKIP.equals(next.getChangeType()))) {
+                result.add(next.getLine());
+            }
+        }
         return result;
     }
 }

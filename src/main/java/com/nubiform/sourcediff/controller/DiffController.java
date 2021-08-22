@@ -124,14 +124,17 @@ public class DiffController {
         model.addAttribute("path", path);
         model.addAttribute("parentPath", directoryService.getParentPath(path));
 
-        List<DiffResponse> diffResponseList = diffService.diff(path);
-        model.addAttribute("diff", diffResponseList);
+        List<DiffResponse> diffResponseList = diffService.getDiff(path);
 
         if (diffResponseList.stream()
-                .anyMatch(diffResponse -> !DiffType.EQUAL.equals(diffResponse.getChangeType())))
+                .anyMatch(diffResponse -> !DiffType.EQUAL.equals(diffResponse.getChangeType()) && !DiffType.SKIP.equals(diffResponse.getChangeType()))) {
+            model.addAttribute("diff", diffService.setDiffView(diffResponseList));
+            model.addAttribute("diffList", diffService.getDiffList(diffResponseList));
             return "diff-view";
-        else
+        } else {
+            model.addAttribute("diff", diffResponseList);
             return "view";
+        }
     }
 
     @GetMapping("/mailing")
@@ -171,5 +174,10 @@ public class DiffController {
         model.addAttribute("files", files);
 
         return "mail";
+    }
+
+    @GetMapping("/sample")
+    public String sample() {
+        return "sample";
     }
 }

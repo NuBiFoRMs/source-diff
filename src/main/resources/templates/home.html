@@ -7,8 +7,8 @@
 <div class="container">
     <div class="mt-5 mb-5">
         <ul class="list-group">
-            <div th:each="file : ${files}" th:remove="tag">
-                <div th:if="${#strings.equals(file.fileType, 'D')}" th:remove="tag">
+            <th:block th:each="file : ${files}">
+                <th:block th:if="${#strings.equals(file.fileType, 'D')}">
                     <a class="list-group-item list-group-item-action" th:href="@{/explorer{path}(path=${file.filePath})}">
                         <div class="d-flex align-items-center justify-content-between">
                             <div class="d-flex align-items-center">
@@ -18,20 +18,20 @@
                                 <h5 class="mt-2" th:text="${file.fileName}">file.fileName</h5>
                             </div>
                             <div>
-                                <div th:if="${file.isDevOnly()}" th:remove="tag">
+                                <th:block th:if="${file.isDevOnly()}">
                                     <span class="badge rounded-pill bg-success">Dev</span>
-                                </div>
-                                <div th:if="${file.isProdOnly()}" th:remove="tag">
+                                </th:block>
+                                <th:block th:if="${file.isProdOnly()}">
                                     <span class="badge rounded-pill bg-secondary">Prod</span>
-                                </div>
-                                <div th:if="${file.diffCount > 0}" th:remove="tag">
+                                </th:block>
+                                <th:block th:if="${file.diffCount > 0}">
                                     <span class="badge rounded-pill bg-primary" th:text="${file.diffCount}">file.diffCount</span>
-                                </div>
+                                </th:block>
                             </div>
                         </div>
                     </a>
-                </div>
-            </div>
+                </th:block>
+            </th:block>
         </ul>
     </div>
 </div>

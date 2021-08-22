@@ -45,19 +45,19 @@
         <td class="headerStyle">Date</td>
         <td class="headerStyle">Comment</td>
     </tr>
-    <div th:each="file : ${files}" th:remove="tag">
+    <th:block th:each="file : ${files}">
         <tr>
             <td class="bodyStyle">
-                <div th:if="${#strings.equals(file.fileType, 'D')}" th:remove="tag">
+                <th:block th:if="${#strings.equals(file.fileType, 'D')}">
                     <a th:href="@{{host}/explorer{path}(host=${host}, path=${file.filePath})}" th:text="${file.getMailingFilePath()}">
                         file.filePath
                     </a>
-                </div>
-                <div th:if="${#strings.equals(file.fileType, 'F')}" th:remove="tag">
+                </th:block>
+                <th:block th:if="${#strings.equals(file.fileType, 'F')}">
                     <a th:href="@{{host}/view{path}(host=${host}, path=${file.filePath})}" th:text="${file.getMailingFilePath()}">
                         file.filePath
                     </a>
-                </div>
+                </th:block>
             </td>
             <td class="bodyStyle" th:text="${file.note}">file.note</td>
             <td class="bodyStyle" style="text-align: center" th:text="${file.getMailingDiffCount()}">file.diffCount</td>
@@ -66,7 +66,7 @@
             <td class="bodyStyle" th:text="${file.commitTime}">file.commitTime</td>
             <td class="bodyStyle" th:text="${file.message}">file.message</td>
         </tr>
-    </div>
+    </th:block>
 </table>
 <p style="font-size: 10pt"><a th:href="@{{host}(host=${host})}">Source Diff. Home</a></p>
 </body>
