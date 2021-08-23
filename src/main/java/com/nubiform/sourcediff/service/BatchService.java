@@ -21,7 +21,7 @@ public class BatchService {
 
     private final FileRepository fileRepository;
 
-    @Scheduled(fixedDelay = 150000)
+    @Scheduled(fixedDelay = 120000)
     public void scan() {
         log.info("start batch: scan");
         appProperties.getRepositories()
@@ -30,7 +30,7 @@ public class BatchService {
         log.info("finish batch: scan");
     }
 
-    @Scheduled(fixedDelay = 5000)
+    @Scheduled(fixedDelay = 30000)
     public void svnInfo() {
         log.info("start batch: svnInfo");
         fileRepository.findAllForUpdateSvnInfo()
@@ -42,11 +42,11 @@ public class BatchService {
         log.info("finish batch: svnInfo");
     }
 
+    @Scheduled(cron = "0 0 8,13 * * 1-5")
     public void mailing() {
         appProperties.getRepositories()
                 .stream()
                 .map(AppProperties.RepositoryProperties::getName)
                 .forEach(mailService::mailing);
-
     }
 }
