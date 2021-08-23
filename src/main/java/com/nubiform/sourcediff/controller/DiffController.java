@@ -3,10 +3,12 @@ package com.nubiform.sourcediff.controller;
 import com.nubiform.sourcediff.config.AppProperties;
 import com.nubiform.sourcediff.constant.DiffType;
 import com.nubiform.sourcediff.constant.FileType;
+import com.nubiform.sourcediff.constant.SourceType;
 import com.nubiform.sourcediff.mail.MailMessage;
 import com.nubiform.sourcediff.repository.FileRepository;
 import com.nubiform.sourcediff.service.DiffService;
 import com.nubiform.sourcediff.service.DirectoryService;
+import com.nubiform.sourcediff.service.HistoryService;
 import com.nubiform.sourcediff.service.MailService;
 import com.nubiform.sourcediff.util.PathUtils;
 import com.nubiform.sourcediff.vo.DiffResponse;
@@ -43,6 +45,7 @@ public class DiffController {
     private final DirectoryService directoryService;
     private final DiffService diffService;
     private final MailService mailService;
+    private final HistoryService historyService;
 
     private final FileRepository fileRepository;
 
@@ -117,19 +120,27 @@ public class DiffController {
     }
 
     @GetMapping(VIEW_URI + REPOSITORY_PATH + ANT_PATTERN)
-    public String view(@PathVariable String repository, Model model, HttpServletRequest request) throws IOException {
+    public String view(@PathVariable String repository,
+                       @RequestParam(required = false) String dev,
+                       @RequestParam(required = false) String prod,
+                       Model model, HttpServletRequest request) throws IOException {
         String path = PathUtils.removePrefix(request.getRequestURI(), VIEW_URI);
-        log.info("request: {}, repository: {}, path: {}", VIEW_URI, repository, path);
+        log.info("request: {}, repository: {}, path: {}, dev: {}, prod: {}", VIEW_URI, repository, path, dev, prod);
 
         model.addAttribute("path", path);
         model.addAttribute("parentPath", directoryService.getParentPath(path));
+        model.addAttribute("devRevision", historyService.getRevisionList(path, SourceType.DEV));
+        model.addAttribute("prodRevision", historyService.getRevisionList(path, SourceType.PROD));
+        model.addAttribute("selectedDev", dev);
+        model.addAttribute("selectedProd", prod);
 
-        List<DiffResponse> diffResponseList = diffService.getDiff(path);
+        List<DiffResponse> diffResponseList = diffService.getDiff(path, dev, prod);
 
         if (diffResponseList.stream()
                 .anyMatch(diffResponse -> !DiffType.EQUAL.equals(diffResponse.getChangeType()) && !DiffType.SKIP.equals(diffResponse.getChangeType()))) {
-            model.addAttribute("diff", diffService.setDiffView(diffResponseList));
+            diffResponseList = diffService.setDiffView(diffResponseList);
             model.addAttribute("diffList", diffService.getDiffList(diffResponseList));
+            model.addAttribute("diff", diffResponseList);
             return "diff-view";
         } else {
             model.addAttribute("diff", diffResponseList);
