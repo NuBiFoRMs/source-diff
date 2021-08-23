@@ -17,6 +17,7 @@ public class BatchService {
     private final AppProperties appProperties;
 
     private final ScanService scanService;
+    private final MailService mailService;
 
     private final FileRepository fileRepository;
 
@@ -39,5 +40,13 @@ public class BatchService {
                 .parallelStream()
                 .forEach(scanService::updateSvnInfo);
         log.info("finish batch: svnInfo");
+    }
+
+    public void mailing() {
+        appProperties.getRepositories()
+                .stream()
+                .map(AppProperties.RepositoryProperties::getName)
+                .forEach(mailService::mailing);
+
     }
 }
