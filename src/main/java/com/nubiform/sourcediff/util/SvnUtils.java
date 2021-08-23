@@ -77,7 +77,7 @@ public class SvnUtils {
         } catch (Exception e) {
             log.info("ignore exception: {}", e.getMessage());
         }
-        return null;
+        return new ArrayList<>();
     }
 
     public static Map<String, Object> log(File location) {
@@ -98,7 +98,7 @@ public class SvnUtils {
         } catch (Exception e) {
             log.info("ignore exception: {}", e.getMessage());
         }
-        return null;
+        return new ArrayList<>();
     }
 
     private static List<Map<String, Object>> extractLog(String result) throws ParserConfigurationException, IOException, SAXException {
@@ -131,6 +131,16 @@ public class SvnUtils {
         documentBuilderFactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
         DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
         return documentBuilder.parse(IOUtils.toInputStream(xmlString, StandardCharsets.UTF_8));
+    }
+
+    public static void export(String url, String revision, String svnUser, String svnPassword, File location) {
+        log.info("export: {}", url);
+        try {
+            String command = "svn export '" + url + "@" + revision + "' --username '" + svnUser + "' --password '" + svnPassword + "' '" + location.getAbsolutePath() + "'";
+            executeCommand(command);
+        } catch (Exception e) {
+            throw new RuntimeException("failed to svn export", e);
+        }
     }
 
     public static void update(File location, String revision, String svnUser, String svnPassword) {

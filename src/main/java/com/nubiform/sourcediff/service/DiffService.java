@@ -5,18 +5,19 @@ import com.github.difflib.text.DiffRowGenerator;
 import com.nubiform.sourcediff.config.AppProperties;
 import com.nubiform.sourcediff.constant.DiffType;
 import com.nubiform.sourcediff.constant.FileType;
+import com.nubiform.sourcediff.constant.SourceType;
 import com.nubiform.sourcediff.repository.FileEntity;
 import com.nubiform.sourcediff.repository.FileRepository;
 import com.nubiform.sourcediff.vo.DiffResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -28,26 +29,40 @@ public class DiffService {
 
     private final AppProperties appProperties;
 
+    private final HistoryService historyService;
+
     private final FileRepository fileRepository;
 
-    public List<DiffResponse> getDiff(String path) throws IOException {
+    public List<DiffResponse> getDiff(String path, String devRevision, String prodRevision) throws IOException {
         FileEntity fileEntity = fileRepository.findByFilePathAndFileType(path, FileType.FILE)
                 .orElseThrow(RuntimeException::new);
 
-        List<String> devSource;
-        List<String> prodSource;
+        List<String> devSource = null;
+        List<String> prodSource = null;
 
-        if (Objects.nonNull(fileEntity.getDevFilePath()) && Objects.nonNull(fileEntity.getProdFilePath())) {
+        if (StringUtils.isNotBlank(devRevision)) {
+            devSource = historyService.exportFile(path, SourceType.DEV, devRevision);
+        } else if (Objects.nonNull(fileEntity.getDevFilePath())) {
             devSource = FileUtils.readLines(new File(fileEntity.getDevFilePath()), StandardCharsets.UTF_8);
+        }
+
+        if (StringUtils.isNotBlank(prodRevision)) {
+            prodSource = historyService.exportFile(path, SourceType.PROD, prodRevision);
+        } else if (Objects.nonNull(fileEntity.getProdFilePath())) {
             prodSource = FileUtils.readLines(new File(fileEntity.getProdFilePath()), StandardCharsets.UTF_8);
-        } else if (Objects.nonNull(fileEntity.getDevFilePath()) && Objects.isNull(fileEntity.getProdFilePath())) {
-            devSource = FileUtils.readLines(new File(fileEntity.getDevFilePath()), StandardCharsets.UTF_8);
+        }
+
+        if (Objects.isNull(devSource) && Objects.isNull(prodSource))
+            throw new RuntimeException();
+        else if (Objects.nonNull(devSource) && Objects.isNull(prodSource))
             prodSource = devSource;
-        } else if (Objects.isNull(fileEntity.getDevFilePath()) && Objects.nonNull(fileEntity.getProdFilePath())) {
-            prodSource = FileUtils.readLines(new File(fileEntity.getProdFilePath()), StandardCharsets.UTF_8);
+        else if (Objects.isNull(devSource) && Objects.nonNull(prodSource))
             devSource = prodSource;
-        } else throw new RemoteException();
 
+        return getDiff(devSource, prodSource);
+    }
+
+    public List<DiffResponse> getDiff(List<String> devSource, List<String> prodSource) {
         DiffRowGenerator diffRowGenerator = DiffRowGenerator.create()
                 .inlineDiffByWord(true)
                 .showInlineDiffs(true)
