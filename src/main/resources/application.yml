@@ -10,7 +10,6 @@ spring:
 source-diff:
   host:
   show-line-count: 30
-  receivers:
   repositories:
     - name:
       dev-url:
@@ -19,6 +18,7 @@ source-diff:
       prod-url:
       prod-username:
       prod-password:
+      receivers:
 
 file-filter:
   prefix:
