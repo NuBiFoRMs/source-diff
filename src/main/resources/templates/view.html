@@ -21,37 +21,37 @@
                         </th:block>
                     </th:block>
                 </div>
-                <form>
-                    <div class="d-flex align-items-center justify-content-between">
-                        <div>Dev</div>
-                        <div class="mx-2">
-                            <select class="form-select form-select-sm" name="dev" th:if="${devRevision.size() == 0}">
-                                <option value="">NONE</option>
-                            </select>
-                            <select class="form-select form-select-sm" name="dev" th:if="${devRevision.size() > 0}">
-                                <option value="">HEAD</option>
-                                <th:block th:each="revision : ${devRevision}">
-                                    <option th:value="${revision}" th:text="${revision}" th:selected="${revision.equals(selectedDev)}">revision</option>
-                                </th:block>
-                            </select>
-                        </div>
-                        <div>Prod</div>
-                        <div class="mx-2">
-                            <select class="form-select form-select-sm" name="prod" th:if="${prodRevision.size() == 0}">
-                                <option value="">NONE</option>
-                            </select>
-                            <select class="form-select form-select-sm" name="prod" th:if="${prodRevision.size() > 0}">
-                                <option value="">HEAD</option>
-                                <th:block th:each="revision : ${prodRevision}">
-                                    <option th:value="${revision}" th:text="${revision}" th:selected="${revision.equals(selectedProd)}">revision</option>
-                                </th:block>
-                            </select>
-                        </div>
-                        <div>
-                            <button class="btn btn-outline-success btn-sm" type="submit">Search</button>
-                        </div>
-                    </div>
-                </form>
+<!--                <form>-->
+<!--                    <div class="d-flex align-items-center justify-content-between">-->
+<!--                        <div>Dev</div>-->
+<!--                        <div class="mx-2">-->
+<!--                            <select class="form-select form-select-sm" name="dev" th:if="${devRevision.size() == 0}">-->
+<!--                                <option value="">NONE</option>-->
+<!--                            </select>-->
+<!--                            <select class="form-select form-select-sm" name="dev" th:if="${devRevision.size() > 0}">-->
+<!--                                <option value="">HEAD</option>-->
+<!--                                <th:block th:each="revision : ${devRevision}">-->
+<!--                                    <option th:value="${revision}" th:text="${revision}" th:selected="${revision.equals(selectedDev)}">revision</option>-->
+<!--                                </th:block>-->
+<!--                            </select>-->
+<!--                        </div>-->
+<!--                        <div>Prod</div>-->
+<!--                        <div class="mx-2">-->
+<!--                            <select class="form-select form-select-sm" name="prod" th:if="${prodRevision.size() == 0}">-->
+<!--                                <option value="">NONE</option>-->
+<!--                            </select>-->
+<!--                            <select class="form-select form-select-sm" name="prod" th:if="${prodRevision.size() > 0}">-->
+<!--                                <option value="">HEAD</option>-->
+<!--                                <th:block th:each="revision : ${prodRevision}">-->
+<!--                                    <option th:value="${revision}" th:text="${revision}" th:selected="${revision.equals(selectedProd)}">revision</option>-->
+<!--                                </th:block>-->
+<!--                            </select>-->
+<!--                        </div>-->
+<!--                        <div>-->
+<!--                            <button class="btn btn-outline-success btn-sm" type="submit">Search</button>-->
+<!--                        </div>-->
+<!--                    </div>-->
+<!--                </form>-->
             </div>
         </div>
     </div>
