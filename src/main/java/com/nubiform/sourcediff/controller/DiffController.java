@@ -3,7 +3,6 @@ package com.nubiform.sourcediff.controller;
 import com.nubiform.sourcediff.config.AppProperties;
 import com.nubiform.sourcediff.constant.DiffType;
 import com.nubiform.sourcediff.constant.FileType;
-import com.nubiform.sourcediff.constant.SourceType;
 import com.nubiform.sourcediff.mail.MailMessage;
 import com.nubiform.sourcediff.repository.FileRepository;
 import com.nubiform.sourcediff.service.DiffService;
@@ -129,10 +128,10 @@ public class DiffController {
 
         model.addAttribute("path", path);
         model.addAttribute("parentPath", directoryService.getParentPath(path));
-        model.addAttribute("devRevision", historyService.getRevisionList(path, SourceType.DEV));
-        model.addAttribute("prodRevision", historyService.getRevisionList(path, SourceType.PROD));
-        model.addAttribute("selectedDev", dev);
-        model.addAttribute("selectedProd", prod);
+//        model.addAttribute("devRevision", historyService.getRevisionList(path, SourceType.DEV));
+//        model.addAttribute("prodRevision", historyService.getRevisionList(path, SourceType.PROD));
+//        model.addAttribute("selectedDev", dev);
+//        model.addAttribute("selectedProd", prod);
 
         List<DiffResponse> diffResponseList = diffService.getDiff(path, dev, prod);
 

@@ -15,8 +15,6 @@ public class AppProperties {
 
     private int showLineCount;
 
-    private List<String> receivers;
-
     private List<RepositoryProperties> repositories;
 
     @Data
@@ -35,5 +33,7 @@ public class AppProperties {
         private String prodUsername;
 
         private String prodPassword;
+
+        private List<String> receivers;
     }
 }
