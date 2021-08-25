@@ -3,7 +3,6 @@ package com.nubiform.sourcediff.controller;
 import com.nubiform.sourcediff.config.AppProperties;
 import com.nubiform.sourcediff.constant.DiffType;
 import com.nubiform.sourcediff.constant.FileType;
-import com.nubiform.sourcediff.mail.MailMessage;
 import com.nubiform.sourcediff.repository.FileRepository;
 import com.nubiform.sourcediff.service.DiffService;
 import com.nubiform.sourcediff.service.DirectoryService;
@@ -17,9 +16,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
@@ -36,8 +38,10 @@ public class DiffController {
     public static final String EXPLORER_URI = "/explorer";
     public static final String FILTER_URI = "/filter";
     public static final String VIEW_URI = "/view";
+    public static final String MAILING_URI = "/mailing";
     public static final String REPOSITORY_PATH = "/{repository}";
     public static final String ANT_PATTERN = "/**";
+    public static final String MAILING_TEST_URI = "/mailing-test";
 
     private final AppProperties appProperties;
 
@@ -147,9 +151,9 @@ public class DiffController {
         }
     }
 
-    @GetMapping("/mailing")
+    @GetMapping(value = MAILING_URI, produces = MediaType.TEXT_HTML_VALUE)
     public String mailing() {
-        log.info("request: {}", "/mailing");
+        log.info("request: {}", MAILING_URI);
 
         appProperties.getRepositories()
                 .stream()
@@ -159,16 +163,23 @@ public class DiffController {
         return "mail-success";
     }
 
-    @ResponseBody
-    @PostMapping("/mail")
-    public String mail(@RequestBody MailMessage mailMessage) {
-        log.info("request: {}, to: {}, subject: {}", "/mail", mailMessage.getTo(), mailMessage.getSubject());
-        log.debug("message\n{}", mailMessage.getMessage());
-        return "SUCCESS";
+    @GetMapping(value = MAILING_URI + REPOSITORY_PATH, produces = MediaType.TEXT_HTML_VALUE)
+    public String mailing(@PathVariable String repository) {
+        log.info("request: {}, repository: {}", MAILING_URI, repository);
+
+        appProperties.getRepositories()
+                .stream()
+                .map(AppProperties.RepositoryProperties::getName)
+                .filter(repo -> repo.equals(repository))
+                .forEach(mailService::mailing);
+
+        return "mail-success";
     }
 
-    @GetMapping("/mailing-test/{repository}")
+    @GetMapping(MAILING_TEST_URI + REPOSITORY_PATH)
     public String mailingTest(@PathVariable String repository, Model model) {
+        log.info("request: {}, repository: {}", MAILING_TEST_URI, repository);
+
         List<FileResponse> files = fileRepository.findAllByFilePathStartsWith(PathUtils.SEPARATOR + repository, Sort.by("filePath", "fileType"))
                 .stream()
                 .filter(file -> file.getDiffCount() > 0 || Objects.isNull(file.getDevFilePath()) || Objects.isNull(file.getProdFilePath()))
@@ -184,10 +195,5 @@ public class DiffController {
         model.addAttribute("files", files);
 
         return "mail";
-    }
-
-    @GetMapping("/sample")
-    public String sample() {
-        return "sample";
     }
 }
