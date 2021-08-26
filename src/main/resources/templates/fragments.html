@@ -78,10 +78,10 @@
         <div class="d-flex align-items-center justify-content-between">
             <div>Dev</div>
             <div class="mx-2">
-                <select class="form-select form-select-sm" name="dev" th:if="${DEVRevision.size() == 0}">
+                <select class="form-select form-select-sm" name="dev" th:if="${DEVRevision == null}">
                     <option value="">NONE</option>
                 </select>
-                <select class="form-select form-select-sm" name="dev" th:if="${DEVRevision.size() > 0}">
+                <select class="form-select form-select-sm" name="dev" th:if="${DEVRevision != null}">
                     <option value="">HEAD</option>
                     <th:block th:each="info : ${DEVRevision}">
                         <option th:value="${info.revision}" th:text="${info.getSvnInfo()}" th:selected="${info.revision.equals(selectedDev)}">info</option>
@@ -90,10 +90,10 @@
             </div>
             <div>Prod</div>
             <div class="mx-2">
-                <select class="form-select form-select-sm" name="prod" th:if="${PRODRevision.size() == 0}">
+                <select class="form-select form-select-sm" name="prod" th:if="${PRODRevision == null}">
                     <option value="">NONE</option>
                 </select>
-                <select class="form-select form-select-sm" name="prod" th:if="${PRODRevision.size() > 0}">
+                <select class="form-select form-select-sm" name="prod" th:if="${PRODRevision != null}">
                     <option value="">HEAD</option>
                     <th:block th:each="info : ${PRODRevision}">
                         <option th:value="${info.revision}" th:text="${info.getSvnInfo()}" th:selected="${info.revision.equals(selectedProd)}">info</option>

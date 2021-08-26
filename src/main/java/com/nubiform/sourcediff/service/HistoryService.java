@@ -18,7 +18,6 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.rmi.RemoteException;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -89,6 +88,7 @@ public class HistoryService {
         if (Objects.nonNull(location)) {
             return svnConnector.log(location, 20)
                     .stream()
+                    .skip(1)
                     .map(svnLog -> SvnInfoResponse.builder()
                             .revision((String) svnLog.get("revision"))
                             .author((String) svnLog.get("author"))
@@ -97,6 +97,6 @@ public class HistoryService {
                             .build())
                     .collect(Collectors.toList());
         } else
-            return new ArrayList<>();
+            return null;
     }
 }
