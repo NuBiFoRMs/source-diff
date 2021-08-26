@@ -61,4 +61,50 @@
     </footer>
 </div>
 
+<th:block th:fragment="diff-header">
+    <div>
+        <th:block th:each="path : ${parentPath}">
+            <th:block th:if="${path.fileType.equals('D')}">
+                <a th:href="@{/explorer{path}(path=${path.filePath})}">
+                    <th:block th:text="${path.fileName}">path.fileName</th:block></a> /
+            </th:block>
+            <th:block th:if="${path.fileType.equals('F')}">
+                <th:block th:text="${path.fileName}">path.fileName</th:block>
+            </th:block>
+        </th:block>
+    </div>
+    <form th:if="${mode != null && mode.equals('revision')}">
+        <input type="hidden" name="mode" th:value="${mode}"/>
+        <div class="d-flex align-items-center justify-content-between">
+            <div>Dev</div>
+            <div class="mx-2">
+                <select class="form-select form-select-sm" name="dev" th:if="${DEVRevision.size() == 0}">
+                    <option value="">NONE</option>
+                </select>
+                <select class="form-select form-select-sm" name="dev" th:if="${DEVRevision.size() > 0}">
+                    <option value="">HEAD</option>
+                    <th:block th:each="revision : ${DEVRevision}">
+                        <option th:value="${revision}" th:text="${revision}" th:selected="${revision.equals(selectedDev)}">revision</option>
+                    </th:block>
+                </select>
+            </div>
+            <div>Prod</div>
+            <div class="mx-2">
+                <select class="form-select form-select-sm" name="prod" th:if="${PRODRevision.size() == 0}">
+                    <option value="">NONE</option>
+                </select>
+                <select class="form-select form-select-sm" name="prod" th:if="${PRODRevision.size() > 0}">
+                    <option value="">HEAD</option>
+                    <th:block th:each="revision : ${PRODRevision}">
+                        <option th:value="${revision}" th:text="${revision}" th:selected="${revision.equals(selectedProd)}">revision</option>
+                    </th:block>
+                </select>
+            </div>
+            <div>
+                <button class="btn btn-outline-success btn-sm" type="submit">Search</button>
+            </div>
+        </div>
+    </form>
+</th:block>
+
 </html>
