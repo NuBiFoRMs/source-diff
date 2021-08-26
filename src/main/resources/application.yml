@@ -28,3 +28,8 @@ file-filter:
 mailing:
   enabled: false
   host:
+
+batch:
+  scan: 120000
+  svn-info: 30000
+  mailing: 0 0 8 * * 1-5
