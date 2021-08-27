@@ -3,6 +3,7 @@ package com.nubiform.sourcediff.controller;
 import com.nubiform.sourcediff.config.AppProperties;
 import com.nubiform.sourcediff.constant.DiffType;
 import com.nubiform.sourcediff.constant.FileType;
+import com.nubiform.sourcediff.constant.SourceType;
 import com.nubiform.sourcediff.repository.FileRepository;
 import com.nubiform.sourcediff.service.DiffService;
 import com.nubiform.sourcediff.service.DirectoryService;
@@ -25,6 +26,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -124,18 +126,30 @@ public class DiffController {
 
     @GetMapping(VIEW_URI + REPOSITORY_PATH + ANT_PATTERN)
     public String view(@PathVariable String repository,
+                       @RequestParam(required = false) String mode,
                        @RequestParam(required = false) String dev,
                        @RequestParam(required = false) String prod,
                        Model model, HttpServletRequest request) throws IOException {
         String path = PathUtils.removePrefix(request.getRequestURI(), VIEW_URI);
-        log.info("request: {}, repository: {}, path: {}, dev: {}, prod: {}", VIEW_URI, repository, path, dev, prod);
+        log.info("request: {}, repository: {}, path: {}, mode: {}, dev: {}, prod: {}", VIEW_URI, repository, path, mode, dev, prod);
 
         model.addAttribute("path", path);
         model.addAttribute("parentPath", directoryService.getParentPath(path));
-//        model.addAttribute("devRevision", historyService.getRevisionList(path, SourceType.DEV));
-//        model.addAttribute("prodRevision", historyService.getRevisionList(path, SourceType.PROD));
-//        model.addAttribute("selectedDev", dev);
-//        model.addAttribute("selectedProd", prod);
+
+        if (StringUtils.equals(mode, "revision")) {
+            List<SourceType> sourceTypes = new ArrayList<>();
+            sourceTypes.add(SourceType.DEV);
+            sourceTypes.add(SourceType.PROD);
+            sourceTypes
+                    .stream()
+                    .parallel()
+                    .forEach(sourceType -> {
+                        model.addAttribute(sourceType + "Revision", historyService.getRevisionList(path, sourceType));
+                    });
+            model.addAttribute("mode", mode);
+            model.addAttribute("selectedDev", dev);
+            model.addAttribute("selectedProd", prod);
+        }
 
         List<DiffResponse> diffResponseList = diffService.getDiff(path, dev, prod);
 

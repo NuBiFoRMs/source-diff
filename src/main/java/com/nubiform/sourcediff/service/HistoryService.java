@@ -7,6 +7,7 @@ import com.nubiform.sourcediff.repository.FileEntity;
 import com.nubiform.sourcediff.repository.FileRepository;
 import com.nubiform.sourcediff.svn.SvnConnector;
 import com.nubiform.sourcediff.util.PathUtils;
+import com.nubiform.sourcediff.vo.SvnInfoResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
@@ -16,7 +17,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.rmi.RemoteException;
-import java.util.ArrayList;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -69,7 +70,7 @@ public class HistoryService {
         return FileUtils.readLines(location, StandardCharsets.UTF_8);
     }
 
-    public List<String> getRevisionList(String path, SourceType sourceType) {
+    public List<SvnInfoResponse> getRevisionList(String path, SourceType sourceType) {
         FileEntity fileEntity = fileRepository.findByFilePathAndFileType(path, FileType.FILE)
                 .orElseThrow(RuntimeException::new);
 
@@ -87,9 +88,15 @@ public class HistoryService {
         if (Objects.nonNull(location)) {
             return svnConnector.log(location, 20)
                     .stream()
-                    .map(svnLog -> (String) svnLog.get("revision"))
+                    .skip(1)
+                    .map(svnLog -> SvnInfoResponse.builder()
+                            .revision((String) svnLog.get("revision"))
+                            .author((String) svnLog.get("author"))
+                            .date((LocalDateTime) svnLog.get("date"))
+                            .message((String) svnLog.get("msg"))
+                            .build())
                     .collect(Collectors.toList());
         } else
-            return new ArrayList<>();
+            return null;
     }
 }
