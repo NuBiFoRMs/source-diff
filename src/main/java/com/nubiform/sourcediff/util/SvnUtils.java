@@ -36,6 +36,7 @@ public class SvnUtils {
     public static final String AUTHOR = "author";
     public static final String DATE = "date";
     public static final String MSG = "msg";
+    public static final String PATH = "path";
 
     public static void checkout(String url, String revision, File location, String svnUser, String svnPassword) {
         log.info("checkout: {}@{} -> {}", url, revision, location.getAbsolutePath());
@@ -71,7 +72,9 @@ public class SvnUtils {
     public static List<Map<String, Object>> log(String url, String svnUser, String svnPassword, int limit) {
         log.info("log: {}", url);
         try {
-            String command = "svn log --with-all-revprops --xml -l " + limit + " '" + url + "' --username '" + svnUser + "' --password '" + svnPassword + "'";
+            String command = "svn log -v --with-all-revprops --xml -l " + limit + " '" + url + "' --username '" + svnUser + "' --password '" + svnPassword + "'";
+            if (limit == 0)
+                command = "svn log -v --with-all-revprops --xml '" + url + "' --username '" + svnUser + "' --password '" + svnPassword + "'";
             String result = executeCommand(command);
             return extractLog(result);
         } catch (Exception e) {
@@ -92,7 +95,9 @@ public class SvnUtils {
     public static List<Map<String, Object>> log(File location, int limit) {
         log.info("log: {}", location.getAbsolutePath());
         try {
-            String command = "svn log --with-all-revprops --xml -l " + limit + " '" + location.getAbsolutePath() + "'";
+            String command = "svn log -v --with-all-revprops --xml -l " + limit + " '" + location.getAbsolutePath() + "'";
+            if (limit == 0)
+                command = "svn log -v --with-all-revprops --xml '" + location.getAbsolutePath() + "'";
             String result = executeCommand(command);
             return extractLog(result);
         } catch (Exception e) {
@@ -103,15 +108,23 @@ public class SvnUtils {
 
     private static List<Map<String, Object>> extractLog(String result) throws ParserConfigurationException, IOException, SAXException {
         Document document = createDocument(result);
-        NodeList logEntry = document.getElementsByTagName("logentry");
+        NodeList logEntryList = document.getElementsByTagName("logentry");
 
         List<Map<String, Object>> svnLogs = new ArrayList<>();
-        for (int i = 0; i < logEntry.getLength(); i++) {
-            Element element = (Element) logEntry.item(i);
-            String revision = element.getAttribute(REVISION);
-            String author = element.getElementsByTagName(AUTHOR).item(0).getTextContent();
-            String date = element.getElementsByTagName(DATE).item(0).getTextContent();
-            String msg = element.getElementsByTagName(MSG).item(0).getTextContent();
+        for (int i = 0; i < logEntryList.getLength(); i++) {
+            Element logEntryElement = (Element) logEntryList.item(i);
+            String revision = logEntryElement.getAttribute(REVISION);
+            String author = logEntryElement.getElementsByTagName(AUTHOR).item(0).getTextContent();
+            String date = logEntryElement.getElementsByTagName(DATE).item(0).getTextContent();
+            String msg = logEntryElement.getElementsByTagName(MSG).item(0).getTextContent();
+
+            NodeList pathList = logEntryElement.getElementsByTagName(PATH);
+            List<String> path = new ArrayList<>();
+            for (int j = 0; j < pathList.getLength(); j++) {
+                Element pathElement = (Element) pathList.item(j);
+                String textContent = pathElement.getTextContent();
+                path.add(textContent);
+            }
 
             Map<String, Object> svnLog = new HashMap<>();
             svnLog.put(REVISION, revision);
@@ -121,6 +134,7 @@ public class SvnUtils {
                     .withZoneSameInstant(ZoneId.systemDefault())
                     .toLocalDateTime());
             svnLog.put(MSG, StringUtils.left(msg, 500));
+            svnLog.put(PATH, path);
             svnLogs.add(svnLog);
         }
         return svnLogs;
