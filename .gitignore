@@ -40,3 +40,5 @@ package-lock.json
 application-*.yml
 dev/
 prod/
+dev_*/
+prod_*/

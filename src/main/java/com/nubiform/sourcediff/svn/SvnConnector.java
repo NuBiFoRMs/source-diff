@@ -2,22 +2,17 @@ package com.nubiform.sourcediff.svn;
 
 import java.io.File;
 import java.util.List;
-import java.util.Map;
 
 public interface SvnConnector {
-    void checkout(String url, String revision, File location, String username, String password);
+    void checkout(String url, String revision, File location, String username, String password) throws SvnException;
 
-    Map<String, Object> log(File location);
+    void export(String url, String revision, File location, String username, String password) throws SvnException;
 
-    Map<String, Object> log(String url, String username, String password);
+    long getHeadRevision(String url, String username, String password);
 
-    List<Map<String, Object>> log(File location, int limit);
+    long getBaseRevision(File location, String username, String password);
 
-    List<Map<String, Object>> log(String url, String username, String password, int limit);
+    SvnLog log(File location, String username, String password);
 
-    long revisionLog(String url, String username, String password);
-
-    long revisionLog(File location);
-
-    void export(String url, String revision, File location, String username, String password);
+    List<SvnLog> log(File location, long limit, String username, String password);
 }

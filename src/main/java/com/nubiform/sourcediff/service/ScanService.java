@@ -10,6 +10,7 @@ import com.nubiform.sourcediff.constant.SourceType;
 import com.nubiform.sourcediff.repository.FileEntity;
 import com.nubiform.sourcediff.repository.FileRepository;
 import com.nubiform.sourcediff.svn.SvnConnector;
+import com.nubiform.sourcediff.svn.SvnLog;
 import com.nubiform.sourcediff.util.PathUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -79,8 +80,8 @@ public class ScanService {
     }
 
     private boolean checkUpdate(String url, File location, String username, String password) {
-        long localRevision = svnConnector.revisionLog(location);
-        long serverRevision = svnConnector.revisionLog(url, username, password);
+        long localRevision = svnConnector.getBaseRevision(location, username, password);
+        long serverRevision = svnConnector.getHeadRevision(url, username, password);
         return localRevision < serverRevision;
     }
 
@@ -193,27 +194,38 @@ public class ScanService {
     @Transactional
     public FileEntity updateSvnInfo(FileEntity file) {
         log.info("updateSvnInfo: {}", file.getFilePath());
+
+        AppProperties.RepositoryProperties repository = getRepository(file.getRepository());
+
         if (file.needToUpdateSvnInfo()) {
             if (Objects.nonNull(file.getDevFilePath())) {
-                Map<String, Object> svnInfo = svnConnector.log(new File(file.getDevFilePath()));
-                log.debug("svnInfo: {}", svnInfo);
-                file.setDevRevision((String) svnInfo.get("revision"));
-                file.setDevMessage((String) svnInfo.get("msg"));
-                file.setDevCommitTime((LocalDateTime) svnInfo.get("date"));
-                file.setDevAuthor((String) svnInfo.get("author"));
+                SvnLog svnLog = svnConnector.log(new File(file.getDevFilePath()), repository.getDevUsername(), repository.getDevPassword());
+                log.debug("svnLog: {}", svnLog);
+                file.setDevRevision(String.valueOf(svnLog.getRevision()));
+                file.setDevAuthor(svnLog.getAuthor());
+                file.setDevCommitTime(svnLog.getDate());
+                file.setDevMessage(svnLog.getMessage());
             }
             if (Objects.nonNull(file.getProdFilePath())) {
-                Map<String, Object> svnInfo = svnConnector.log(new File(file.getProdFilePath()));
-                log.debug("svnInfo: {}", svnInfo);
-                file.setProdRevision((String) svnInfo.get("revision"));
-                file.setProdMessage((String) svnInfo.get("msg"));
-                file.setProdCommitTime((LocalDateTime) svnInfo.get("date"));
-                file.setProdAuthor((String) svnInfo.get("author"));
+                SvnLog svnLog = svnConnector.log(new File(file.getProdFilePath()), repository.getProdUsername(), repository.getProdPassword());
+                log.debug("svnLog: {}", svnLog);
+                file.setProdRevision(String.valueOf(svnLog.getRevision()));
+                file.setProdAuthor(svnLog.getAuthor());
+                file.setProdCommitTime(svnLog.getDate());
+                file.setProdMessage(svnLog.getMessage());
             }
 
             file.setInfoModified(LocalDateTime.now());
         }
 
         return fileRepository.save(file);
+    }
+
+    private AppProperties.RepositoryProperties getRepository(String repository) {
+        return appProperties.getRepositories()
+                .stream()
+                .filter(repo -> repo.getName().equals(repository))
+                .findFirst()
+                .orElseThrow(RuntimeException::new);
     }
 }

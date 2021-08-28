@@ -11,13 +11,13 @@ import com.nubiform.sourcediff.vo.SvnInfoResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
+import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.rmi.RemoteException;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -32,6 +32,8 @@ public class HistoryService {
     private final SvnConnector svnConnector;
 
     private final FileRepository fileRepository;
+
+    private final ModelMapper modelMapper;
 
     public List<String> exportFile(String path, SourceType sourceType, String revision) throws IOException {
         FileEntity fileEntity = fileRepository.findByFilePathAndFileType(path, FileType.FILE)
@@ -50,11 +52,7 @@ public class HistoryService {
                 throw new RemoteException();
         }
 
-        AppProperties.RepositoryProperties repository = appProperties.getRepositories()
-                .stream()
-                .filter(repo -> repo.getName().equals(fileEntity.getRepository()))
-                .findFirst()
-                .orElseThrow(RuntimeException::new);
+        AppProperties.RepositoryProperties repository = getRepository(fileEntity.getRepository());
 
         String url = repository.getDevUrl();
         String username = repository.getDevUsername();
@@ -68,6 +66,14 @@ public class HistoryService {
         svnConnector.export(url + path, revision, location.getParentFile(), username, password);
 
         return FileUtils.readLines(location, StandardCharsets.UTF_8);
+    }
+
+    private AppProperties.RepositoryProperties getRepository(String repository) {
+        return appProperties.getRepositories()
+                .stream()
+                .filter(repo -> repo.getName().equals(repository))
+                .findFirst()
+                .orElseThrow(RuntimeException::new);
     }
 
     public List<SvnInfoResponse> getRevisionList(String path, SourceType sourceType) {
@@ -85,16 +91,20 @@ public class HistoryService {
             location = new File(fileEntity.getProdFilePath());
         }
 
+        AppProperties.RepositoryProperties repository = getRepository(fileEntity.getRepository());
+
+        String username = repository.getDevUsername();
+        String password = repository.getDevPassword();
+        if (SourceType.PROD.equals(sourceType)) {
+            username = repository.getProdUsername();
+            password = repository.getProdPassword();
+        }
+
         if (Objects.nonNull(location)) {
-            return svnConnector.log(location, 20)
+            return svnConnector.log(location, 20, username, password)
                     .stream()
                     .skip(1)
-                    .map(svnLog -> SvnInfoResponse.builder()
-                            .revision((String) svnLog.get("revision"))
-                            .author((String) svnLog.get("author"))
-                            .date((LocalDateTime) svnLog.get("date"))
-                            .message((String) svnLog.get("msg"))
-                            .build())
+                    .map(svnLog -> modelMapper.map(svnLog, SvnInfoResponse.class))
                     .collect(Collectors.toList());
         } else
             return null;
