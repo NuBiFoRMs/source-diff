@@ -3,7 +3,6 @@ package com.nubiform.sourcediff.svn;
 import com.nubiform.sourcediff.util.SvnUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
-import org.springframework.stereotype.Component;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -23,7 +22,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
-@Component
 public class CommandLineConn implements SvnConnector {
 
     private static final String LOGENTRY = "logentry";
@@ -34,8 +32,21 @@ public class CommandLineConn implements SvnConnector {
     private static final String PATH = "path";
 
     @Override
-    public void checkout(String url, String revision, File location, String username, String password) {
-        SvnUtils.checkout(url, revision, location, username, password);
+    public void checkout(String url, String revision, File location, String username, String password) throws SvnException {
+        try {
+            SvnUtils.checkout(url, revision, location, username, password);
+        } catch (Exception e) {
+            throw new SvnException("failed to svn checkout", e);
+        }
+    }
+
+    @Override
+    public void export(String url, String revision, File location, String username, String password) throws SvnException {
+        try {
+            SvnUtils.export(url, revision, location, username, password);
+        } catch (Exception e) {
+            throw new SvnException("failed to svn export", e);
+        }
     }
 
     @Override
@@ -76,11 +87,6 @@ public class CommandLineConn implements SvnConnector {
             log.info("ignore exception: {}", e.getLocalizedMessage());
         }
         return new ArrayList<>();
-    }
-
-    @Override
-    public void export(String url, String revision, File location, String username, String password) {
-        SvnUtils.export(url, revision, location, username, password);
     }
 
     private Document createDocument(String xmlString) throws ParserConfigurationException, IOException, SAXException {

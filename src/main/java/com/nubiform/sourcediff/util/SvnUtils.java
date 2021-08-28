@@ -34,8 +34,8 @@ public class SvnUtils {
         return " --username '" + username + "' --password '" + password + "'";
     }
 
-    private static String getLocalLocationCommand(File localLocation) {
-        return " '" + localLocation.getAbsolutePath() + "'";
+    private static String getLocationCommand(File location) {
+        return " '" + location.getAbsolutePath() + "'";
     }
 
     private static String getRevisionCommand(String revision) {
@@ -50,23 +50,23 @@ public class SvnUtils {
         return " -l '" + limit + "'";
     }
 
-    public static void checkout(String url, String revision, File localLocation, String username, String password) {
-        log.info("checkout: {}@{} -> {}", url, revision, localLocation.getAbsolutePath());
+    public static void checkout(String url, String revision, File location, String username, String password) {
+        log.debug("checkout: {}@{} -> {}", url, revision, location.getAbsolutePath());
 
         // svn checkout
         String checkoutCommand = "svn checkout --depth infinity" +
                 getUrlCommand(url, revision) +
-                getLocalLocationCommand(localLocation) +
+                getLocationCommand(location) +
                 getAuthenticationCommand(username, password);
         try {
             // svn revert
             String revertCommand = "svn revert -R" +
-                    getLocalLocationCommand(localLocation) +
+                    getLocationCommand(location) +
                     getAuthenticationCommand(username, password);
             try {
                 executeCommand(revertCommand);
             } catch (Exception e) {
-                log.info("ignore exception: {}, revertCommand: {}", e.getLocalizedMessage(), revertCommand);
+                log.debug("ignore exception: {}, revertCommand: {}", e.getLocalizedMessage(), revertCommand);
             }
 
             executeCommand(checkoutCommand);
@@ -74,6 +74,23 @@ public class SvnUtils {
             log.error("exception: {}", e.getLocalizedMessage());
             log.error("checkoutCommand: {}", checkoutCommand);
             throw new RuntimeException("failed to svn checkout", e);
+        }
+    }
+
+    public static void export(String url, String revision, File location, String username, String password) {
+        log.debug("export: {}@{} -> {}", url, revision, location.getAbsolutePath());
+
+        // svn checkout
+        String exportCommand = "svn export --force" +
+                getUrlCommand(url, revision) +
+                getLocationCommand(location) +
+                getAuthenticationCommand(username, password);
+        try {
+            executeCommand(exportCommand);
+        } catch (Exception e) {
+            log.error("exception: {}", e.getLocalizedMessage());
+            log.error("checkoutCommand: {}", exportCommand);
+            throw new RuntimeException("failed to svn export", e);
         }
     }
 
@@ -89,25 +106,25 @@ public class SvnUtils {
         return svnLog(url, null, getRevisionCommand(startRevision, endRevision), limit, username, password);
     }
 
-    public String log(File localLocation, long limit, String username, String password) {
-        return svnLog(null, localLocation, null, limit, username, password);
+    public String log(File location, long limit, String username, String password) {
+        return svnLog(null, location, null, limit, username, password);
     }
 
-    public String log(File localLocation, String revision, long limit, String username, String password) {
-        return svnLog(null, localLocation, getRevisionCommand(revision), limit, username, password);
+    public String log(File location, String revision, long limit, String username, String password) {
+        return svnLog(null, location, getRevisionCommand(revision), limit, username, password);
     }
 
-    public String log(File localLocation, String startRevision, String endRevision, long limit, String username, String password) {
-        return svnLog(null, localLocation, getRevisionCommand(startRevision, endRevision), limit, username, password);
+    public String log(File location, String startRevision, String endRevision, long limit, String username, String password) {
+        return svnLog(null, location, getRevisionCommand(startRevision, endRevision), limit, username, password);
     }
 
-    private String svnLog(String url, File localLocation, String revisionCommand, long limit, String username, String password) {
-        log.info("svnLog: url: {}, file: {}", url, localLocation);
+    private String svnLog(String url, File location, String revisionCommand, long limit, String username, String password) {
+        log.debug("svnLog: url: {}, file: {}", url, location);
         String logCommand = "svn log -v --with-all-revprops --xml" +
                 (Objects.nonNull(revisionCommand) ? revisionCommand : "") +
                 (limit > 0 ? getLimitCommand(limit) : "") +
                 (Objects.nonNull(url) ? getUrlCommand(url) : "") +
-                (Objects.nonNull(localLocation) ? getLocalLocationCommand(localLocation) : "") +
+                (Objects.nonNull(location) ? getLocationCommand(location) : "") +
                 getAuthenticationCommand(username, password);
         try {
             return executeCommand(logCommand);
@@ -116,23 +133,6 @@ public class SvnUtils {
             log.error("checkoutCommand: {}", logCommand);
         }
         return null;
-    }
-
-    public static void export(String url, String revision, File localLocation, String username, String password) {
-        log.info("export: {}@{} -> {}", url, revision, localLocation.getAbsolutePath());
-
-        // svn checkout
-        String exportCommand = "svn export" +
-                getUrlCommand(url, revision) +
-                getLocalLocationCommand(localLocation) +
-                getAuthenticationCommand(username, password);
-        try {
-            executeCommand(exportCommand);
-        } catch (Exception e) {
-            log.error("exception: {}", e.getLocalizedMessage());
-            log.error("checkoutCommand: {}", exportCommand);
-            throw new RuntimeException("failed to svn export", e);
-        }
     }
 
     private static String executeCommand(CommandLine commandLine) throws RuntimeException {
