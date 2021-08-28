@@ -1,8 +1,6 @@
 package com.nubiform.sourcediff.svn;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.annotation.Primary;
-import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 import org.tmatesoft.svn.core.SVNDepth;
 import org.tmatesoft.svn.core.SVNLogEntry;
@@ -20,8 +18,6 @@ import java.util.List;
 import java.util.Objects;
 
 @Slf4j
-@Primary
-@Profile("test")
 @Component
 public class SvnKitConn implements SvnConnector {
 
