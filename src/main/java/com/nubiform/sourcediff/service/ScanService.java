@@ -82,6 +82,10 @@ public class ScanService {
     private boolean checkUpdate(String url, File location, String username, String password) {
         long localRevision = svnConnector.getBaseRevision(location, username, password);
         long serverRevision = svnConnector.getHeadRevision(url, username, password);
+
+        if (serverRevision == -1)
+            throw new RuntimeException("invalid svn server info.");
+
         return localRevision < serverRevision;
     }
 
