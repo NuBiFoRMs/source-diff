@@ -1,8 +1,10 @@
 package com.nubiform.sourcediff.svn;
 
+import com.nubiform.sourcediff.constant.FileType;
 import com.nubiform.sourcediff.util.SvnUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -56,7 +58,7 @@ public class CommandLineConn implements SvnConnector {
         } catch (Exception e) {
             log.info("ignore exception: {}", e.getLocalizedMessage());
         }
-        return 0;
+        return -1;
     }
 
     @Override
@@ -66,7 +68,7 @@ public class CommandLineConn implements SvnConnector {
         } catch (Exception e) {
             log.info("ignore exception: {}", e.getLocalizedMessage());
         }
-        return 0;
+        return -1;
     }
 
     @Override
@@ -89,6 +91,26 @@ public class CommandLineConn implements SvnConnector {
         return new ArrayList<>();
     }
 
+    @Override
+    public List<SvnLog> log(File location, String startRevision, String endRevision, String username, String password) {
+        try {
+            return extractLog(SvnUtils.log(location, startRevision, endRevision, 0, username, password));
+        } catch (Exception e) {
+            log.info("ignore exception: {}", e.getLocalizedMessage());
+        }
+        return new ArrayList<>();
+    }
+
+    @Override
+    public SvnInfo svnInfo(File location, String username, String password) {
+        try {
+            return extractSvnInfo(SvnUtils.svnInfo(location, username, password));
+        } catch (Exception e) {
+            log.info("ignore exception: {}", e.getLocalizedMessage());
+        }
+        return null;
+    }
+
     private Document createDocument(String xmlString) throws ParserConfigurationException, IOException, SAXException {
         DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
         documentBuilderFactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
@@ -108,11 +130,17 @@ public class CommandLineConn implements SvnConnector {
             String msg = logEntryElement.getElementsByTagName(MSG).item(0).getTextContent();
 
             NodeList pathList = logEntryElement.getElementsByTagName(PATH);
-            List<String> path = new ArrayList<>();
+            List<SvnLog.Path> path = new ArrayList<>();
             for (int j = 0; j < pathList.getLength(); j++) {
                 Element pathElement = (Element) pathList.item(j);
-                String textContent = pathElement.getTextContent();
-                path.add(textContent);
+                String fileType = pathElement.getAttribute("kind");
+                String action = pathElement.getAttribute("action");
+                String filePath = pathElement.getTextContent();
+                path.add(SvnLog.Path.builder()
+                        .fileType(StringUtils.equals("file", fileType) ? FileType.FILE : StringUtils.equals("dir", fileType) ? FileType.DIRECTORY : null)
+                        .action(action)
+                        .filePath(filePath)
+                        .build());
             }
 
             svnLogList.add(SvnLog.builder()
@@ -122,10 +150,21 @@ public class CommandLineConn implements SvnConnector {
                             .parse(date, DateTimeFormatter.ISO_DATE_TIME)
                             .withZoneSameInstant(ZoneId.systemDefault())
                             .toLocalDateTime())
-                    .message(msg)
+                    .message(StringUtils.left(msg, 500))
+                    .path(path)
                     .build());
         }
 
         return svnLogList;
+    }
+
+    private SvnInfo extractSvnInfo(String result) throws ParserConfigurationException, IOException, SAXException {
+        Document document = createDocument(result);
+        String url = document.getElementsByTagName("url").item(0).getTextContent();
+        String root = document.getElementsByTagName("root").item(0).getTextContent();
+        return SvnInfo.builder()
+                .url(url)
+                .root(root)
+                .build();
     }
 }

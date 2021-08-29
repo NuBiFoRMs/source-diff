@@ -7,8 +7,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import java.util.stream.Collectors;
-
 @Slf4j
 @RequiredArgsConstructor
 @Service
@@ -21,7 +19,7 @@ public class BatchService {
 
     private final FileRepository fileRepository;
 
-    @Scheduled(fixedDelayString = "${batch.scan}")
+    @Scheduled(fixedDelayString = "${scheduler.scan}")
     public void scan() {
         log.info("start batch: scan");
         appProperties.getRepositories()
@@ -30,19 +28,15 @@ public class BatchService {
         log.info("finish batch: scan");
     }
 
-    @Scheduled(fixedDelayString = "${batch.svn-info}")
-    public void svnInfo() {
-        log.info("start batch: svnInfo");
-        fileRepository.findAllForUpdateSvnInfo()
-                .stream()
-                .limit(20)
-                .collect(Collectors.toList())
+    public void svnInfoScan() {
+        log.info("start batch: svnInfoScan");
+        appProperties.getRepositories()
                 .parallelStream()
-                .forEach(scanService::updateSvnInfo);
-        log.info("finish batch: svnInfo");
+                .forEach(scanService::scanSvnInfo);
+        log.info("finish batch: svnInfoScan");
     }
 
-    @Scheduled(cron = "${batch.mailing}")
+    @Scheduled(cron = "${scheduler.mailing}")
     public void mailing() {
         appProperties.getRepositories()
                 .stream()

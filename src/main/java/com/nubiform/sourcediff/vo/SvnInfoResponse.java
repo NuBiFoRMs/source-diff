@@ -18,11 +18,11 @@ public class SvnInfoResponse {
 
     private String author;
 
-    private LocalDateTime date;
+    private LocalDateTime commitTime;
 
     private String message;
 
     public String getSvnInfo() {
-        return String.format("%s [%s]", this.revision, this.date.format(DateTimeFormatter.ISO_DATE));
+        return String.format("%s [%s]", this.revision, this.commitTime.format(DateTimeFormatter.ISO_DATE));
     }
 }

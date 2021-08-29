@@ -5,6 +5,7 @@ import com.nubiform.sourcediff.constant.FileType;
 import com.nubiform.sourcediff.constant.SourceType;
 import com.nubiform.sourcediff.repository.FileEntity;
 import com.nubiform.sourcediff.repository.FileRepository;
+import com.nubiform.sourcediff.repository.SvnLogRepository;
 import com.nubiform.sourcediff.svn.SvnConnector;
 import com.nubiform.sourcediff.util.PathUtils;
 import com.nubiform.sourcediff.vo.SvnInfoResponse;
@@ -19,7 +20,6 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.rmi.RemoteException;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -32,6 +32,7 @@ public class HistoryService {
     private final SvnConnector svnConnector;
 
     private final FileRepository fileRepository;
+    private final SvnLogRepository svnLogRepository;
 
     private final ModelMapper modelMapper;
 
@@ -77,36 +78,11 @@ public class HistoryService {
     }
 
     public List<SvnInfoResponse> getRevisionList(String path, SourceType sourceType) {
-        FileEntity fileEntity = fileRepository.findByFilePathAndFileType(path, FileType.FILE)
-                .orElseThrow(RuntimeException::new);
-
-        path = PathUtils.removePrefix(fileEntity.getFilePath(), fileEntity.getRepository());
-
-        File location = null;
-        if (SourceType.DEV.equals(sourceType) && Objects.nonNull(fileEntity.getDevFilePath())) {
-            location = new File(fileEntity.getDevFilePath());
-        }
-
-        if (SourceType.PROD.equals(sourceType) && Objects.nonNull(fileEntity.getProdFilePath())) {
-            location = new File(fileEntity.getProdFilePath());
-        }
-
-        AppProperties.RepositoryProperties repository = getRepository(fileEntity.getRepository());
-
-        String username = repository.getDevUsername();
-        String password = repository.getDevPassword();
-        if (SourceType.PROD.equals(sourceType)) {
-            username = repository.getProdUsername();
-            password = repository.getProdPassword();
-        }
-
-        if (Objects.nonNull(location)) {
-            return svnConnector.log(location, 20, username, password)
-                    .stream()
-                    .skip(1)
-                    .map(svnLog -> modelMapper.map(svnLog, SvnInfoResponse.class))
-                    .collect(Collectors.toList());
-        } else
-            return null;
+        List<SvnInfoResponse> collect = svnLogRepository.findAllByFilePathAndSourceTypeOrderByRevisionDesc(path, sourceType.toString())
+                .stream()
+                .skip(1)
+                .map(svnLog -> modelMapper.map(svnLog, SvnInfoResponse.class))
+                .collect(Collectors.toList());
+        return collect;
     }
 }

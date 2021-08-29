@@ -2,6 +2,8 @@ package com.nubiform.sourcediff.config;
 
 import com.nubiform.sourcediff.mail.ConsoleMailSender;
 import com.nubiform.sourcediff.mail.MailSender;
+import com.nubiform.sourcediff.svn.CommandLineConn;
+import com.nubiform.sourcediff.svn.SvnConnector;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.NameTokenizers;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -30,5 +32,11 @@ public class AppConfig {
     @Bean
     public MailSender consoleMailSender() {
         return new ConsoleMailSender();
+    }
+
+    @ConditionalOnMissingBean(SvnConnector.class)
+    @Bean
+    public SvnConnector commandLineConn() {
+        return new CommandLineConn();
     }
 }
