@@ -126,30 +126,26 @@ public class DiffController {
 
     @GetMapping(VIEW_URI + REPOSITORY_PATH + ANT_PATTERN)
     public String view(@PathVariable String repository,
-                       @RequestParam(required = false) String mode,
                        @RequestParam(required = false) String dev,
                        @RequestParam(required = false) String prod,
                        Model model, HttpServletRequest request) throws IOException {
         String path = PathUtils.removePrefix(request.getRequestURI(), VIEW_URI);
-        log.info("request: {}, repository: {}, path: {}, mode: {}, dev: {}, prod: {}", VIEW_URI, repository, path, mode, dev, prod);
+        log.info("request: {}, repository: {}, path: {}, dev: {}, prod: {}", VIEW_URI, repository, path, dev, prod);
 
         model.addAttribute("path", path);
         model.addAttribute("parentPath", directoryService.getParentPath(path));
 
-        if (StringUtils.equals(mode, "revision")) {
-            List<SourceType> sourceTypes = new ArrayList<>();
-            sourceTypes.add(SourceType.DEV);
-            sourceTypes.add(SourceType.PROD);
-            sourceTypes
-                    .stream()
-                    .parallel()
-                    .forEach(sourceType -> {
-                        model.addAttribute(sourceType + "Revision", historyService.getRevisionList(path, sourceType));
-                    });
-            model.addAttribute("mode", mode);
-            model.addAttribute("selectedDev", dev);
-            model.addAttribute("selectedProd", prod);
-        }
+        List<SourceType> sourceTypes = new ArrayList<>();
+        sourceTypes.add(SourceType.DEV);
+        sourceTypes.add(SourceType.PROD);
+        sourceTypes
+                .stream()
+                .parallel()
+                .forEach(sourceType -> {
+                    model.addAttribute(sourceType + "Revision", historyService.getRevisionList(path, sourceType));
+                });
+        model.addAttribute("selectedDev", dev);
+        model.addAttribute("selectedProd", prod);
 
         List<DiffResponse> diffResponseList = diffService.getDiff(path, dev, prod);
 

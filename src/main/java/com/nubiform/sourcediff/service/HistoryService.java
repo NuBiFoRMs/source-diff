@@ -81,6 +81,7 @@ public class HistoryService {
         List<SvnInfoResponse> collect = svnLogRepository.findAllByFilePathAndSourceTypeOrderByRevisionDesc(path, sourceType.toString())
                 .stream()
                 .skip(1)
+                .limit(20)
                 .map(svnLog -> modelMapper.map(svnLog, SvnInfoResponse.class))
                 .collect(Collectors.toList());
         return collect;
