@@ -56,7 +56,7 @@ public class CommandLineConn implements SvnConnector {
         } catch (Exception e) {
             log.info("ignore exception: {}", e.getLocalizedMessage());
         }
-        return 0;
+        return -1;
     }
 
     @Override
@@ -66,7 +66,7 @@ public class CommandLineConn implements SvnConnector {
         } catch (Exception e) {
             log.info("ignore exception: {}", e.getLocalizedMessage());
         }
-        return 0;
+        return -1;
     }
 
     @Override
@@ -87,6 +87,16 @@ public class CommandLineConn implements SvnConnector {
             log.info("ignore exception: {}", e.getLocalizedMessage());
         }
         return new ArrayList<>();
+    }
+
+    @Override
+    public SvnInfo svnInfo(File location, String username, String password) {
+        try {
+            return extractSvnInfo(SvnUtils.svnInfo(location, username, password));
+        } catch (Exception e) {
+            log.info("ignore exception: {}", e.getLocalizedMessage());
+        }
+        return null;
     }
 
     private Document createDocument(String xmlString) throws ParserConfigurationException, IOException, SAXException {
@@ -127,5 +137,15 @@ public class CommandLineConn implements SvnConnector {
         }
 
         return svnLogList;
+    }
+
+    private SvnInfo extractSvnInfo(String result) throws ParserConfigurationException, IOException, SAXException {
+        Document document = createDocument(result);
+        String url = document.getElementsByTagName("url").item(0).getTextContent();
+        String root = document.getElementsByTagName("root").item(0).getTextContent();
+        return SvnInfo.builder()
+                .url(url)
+                .root(root)
+                .build();
     }
 }

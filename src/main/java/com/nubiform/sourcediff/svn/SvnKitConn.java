@@ -8,6 +8,7 @@ import org.tmatesoft.svn.core.SVNURL;
 import org.tmatesoft.svn.core.auth.ISVNAuthenticationManager;
 import org.tmatesoft.svn.core.internal.wc.DefaultSVNOptions;
 import org.tmatesoft.svn.core.wc.SVNClientManager;
+import org.tmatesoft.svn.core.wc.SVNInfo;
 import org.tmatesoft.svn.core.wc.SVNRevision;
 import org.tmatesoft.svn.core.wc.SVNWCUtil;
 
@@ -56,7 +57,7 @@ public class SvnKitConn implements SvnConnector {
         } catch (Exception e) {
             log.info("ignore exception: {}", e.getLocalizedMessage());
         }
-        return 0;
+        return -1;
     }
 
     @Override
@@ -66,7 +67,7 @@ public class SvnKitConn implements SvnConnector {
         } catch (Exception e) {
             log.info("ignore exception: {}", e.getLocalizedMessage());
         }
-        return 0;
+        return -1;
     }
 
     @Override
@@ -87,6 +88,22 @@ public class SvnKitConn implements SvnConnector {
             log.info("ignore exception: {}", e.getLocalizedMessage());
         }
         return new ArrayList<>();
+    }
+
+    @Override
+    public SvnInfo svnInfo(File location, String username, String password) {
+        try {
+            SVNInfo svnInfo = getClientManager(username, password)
+                    .getWCClient()
+                    .doInfo(location, SVNRevision.BASE);
+            return SvnInfo.builder()
+                    .url(svnInfo.getURL().toString())
+                    .root(svnInfo.getRepositoryRootURL().toString())
+                    .build();
+        } catch (Exception e) {
+            log.info("ignore exception: {}", e.getLocalizedMessage());
+        }
+        return null;
     }
 
     private List<SvnLog> svnLog(String url, File location, String startRevision, String endRevision, long limit, String username, String password) {

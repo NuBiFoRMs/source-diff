@@ -15,4 +15,6 @@ public interface SvnConnector {
     SvnLog log(File location, String username, String password);
 
     List<SvnLog> log(File location, long limit, String username, String password);
+
+    SvnInfo svnInfo(File location, String username, String password);
 }

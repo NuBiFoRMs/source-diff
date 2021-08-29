@@ -16,12 +16,6 @@ import java.util.Objects;
 @UtilityClass
 public class SvnUtils {
 
-    public static final String REVISION = "revision";
-    public static final String AUTHOR = "author";
-    public static final String DATE = "date";
-    public static final String MSG = "msg";
-    public static final String PATH = "path";
-
     private static String getUrlCommand(String url) {
         return " '" + url + "'";
     }
@@ -94,31 +88,45 @@ public class SvnUtils {
         }
     }
 
-    public String log(String url, long limit, String username, String password) {
+    public static String svnInfo(File location, String username, String password) {
+        log.debug("svnInfo: file: {}", location);
+        String svnInfoCommand = "svn info --xml" +
+                (Objects.nonNull(location) ? getLocationCommand(location) : "") +
+                getAuthenticationCommand(username, password);
+        try {
+            return executeCommand(svnInfoCommand);
+        } catch (Exception e) {
+            log.error("exception: {}", e.getLocalizedMessage());
+            log.error("checkoutCommand: {}", svnInfoCommand);
+        }
+        return null;
+    }
+
+    public static String log(String url, long limit, String username, String password) {
         return svnLog(url, null, null, limit, username, password);
     }
 
-    public String log(String url, String revision, long limit, String username, String password) {
+    public static String log(String url, String revision, long limit, String username, String password) {
         return svnLog(url, null, getRevisionCommand(revision), limit, username, password);
     }
 
-    public String log(String url, String startRevision, String endRevision, long limit, String username, String password) {
+    public static String log(String url, String startRevision, String endRevision, long limit, String username, String password) {
         return svnLog(url, null, getRevisionCommand(startRevision, endRevision), limit, username, password);
     }
 
-    public String log(File location, long limit, String username, String password) {
+    public static String log(File location, long limit, String username, String password) {
         return svnLog(null, location, null, limit, username, password);
     }
 
-    public String log(File location, String revision, long limit, String username, String password) {
+    public static String log(File location, String revision, long limit, String username, String password) {
         return svnLog(null, location, getRevisionCommand(revision), limit, username, password);
     }
 
-    public String log(File location, String startRevision, String endRevision, long limit, String username, String password) {
+    public static String log(File location, String startRevision, String endRevision, long limit, String username, String password) {
         return svnLog(null, location, getRevisionCommand(startRevision, endRevision), limit, username, password);
     }
 
-    private String svnLog(String url, File location, String revisionCommand, long limit, String username, String password) {
+    private static String svnLog(String url, File location, String revisionCommand, long limit, String username, String password) {
         log.debug("svnLog: url: {}, file: {}", url, location);
         String logCommand = "svn log -v --with-all-revprops --xml" +
                 (Objects.nonNull(revisionCommand) ? revisionCommand : "") +
