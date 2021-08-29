@@ -92,6 +92,16 @@ public class CommandLineConn implements SvnConnector {
     }
 
     @Override
+    public List<SvnLog> log(File location, String startRevision, String endRevision, String username, String password) {
+        try {
+            return extractLog(SvnUtils.log(location, startRevision, endRevision, 0, username, password));
+        } catch (Exception e) {
+            log.info("ignore exception: {}", e.getLocalizedMessage());
+        }
+        return new ArrayList<>();
+    }
+
+    @Override
     public SvnInfo svnInfo(File location, String username, String password) {
         try {
             return extractSvnInfo(SvnUtils.svnInfo(location, username, password));
@@ -140,7 +150,7 @@ public class CommandLineConn implements SvnConnector {
                             .parse(date, DateTimeFormatter.ISO_DATE_TIME)
                             .withZoneSameInstant(ZoneId.systemDefault())
                             .toLocalDateTime())
-                    .message(msg)
+                    .message(StringUtils.left(msg, 500))
                     .path(path)
                     .build());
         }

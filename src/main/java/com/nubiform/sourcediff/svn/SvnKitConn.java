@@ -2,6 +2,7 @@ package com.nubiform.sourcediff.svn;
 
 import com.nubiform.sourcediff.constant.FileType;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 import org.tmatesoft.svn.core.SVNDepth;
@@ -97,6 +98,16 @@ public class SvnKitConn implements SvnConnector {
     }
 
     @Override
+    public List<SvnLog> log(File location, String startRevision, String endRevision, String username, String password) {
+        try {
+            return svnLog(null, location, startRevision, endRevision, 0, username, password);
+        } catch (Exception e) {
+            log.info("ignore exception: {}", e.getLocalizedMessage());
+        }
+        return new ArrayList<>();
+    }
+
+    @Override
     public SvnInfo svnInfo(File location, String username, String password) {
         try {
             SVNInfo svnInfo = getClientManager(username, password)
@@ -151,7 +162,7 @@ public class SvnKitConn implements SvnConnector {
                         .toInstant()
                         .atZone(ZoneId.systemDefault())
                         .toLocalDateTime())
-                .message(svnLogEntry.getMessage())
+                .message(StringUtils.left(svnLogEntry.getMessage(), 500))
                 .path(svnLogEntry.getChangedPaths().entrySet()
                         .stream()
                         .map(Map.Entry::getValue)

@@ -33,6 +33,8 @@ public class SvnLogEntity {
 
     private String fileType;
 
+    private String action;
+
     @Column(length = 500)
     private String message;
 

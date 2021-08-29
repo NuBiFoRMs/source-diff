@@ -38,7 +38,7 @@ public class FileEntity {
 
     private LocalDateTime devModified;
 
-    private String devRevision;
+    private Long devRevision;
 
     @Column(length = 500)
     private String devMessage;
@@ -51,7 +51,7 @@ public class FileEntity {
 
     private LocalDateTime prodModified;
 
-    private String prodRevision;
+    private Long prodRevision;
 
     @Column(length = 500)
     private String prodMessage;
@@ -64,17 +64,9 @@ public class FileEntity {
 
     private LocalDateTime scanModified;
 
-    private LocalDateTime infoModified;
-
     public boolean needToScan() {
         return Objects.isNull(this.scanModified) ||
                 (Objects.nonNull(this.devFilePath) && this.scanModified.isBefore(this.devModified)) ||
                 (Objects.nonNull(this.prodFilePath) && this.scanModified.isBefore(this.prodModified));
-    }
-
-    public boolean needToUpdateSvnInfo() {
-        return Objects.isNull(this.infoModified) ||
-                (Objects.nonNull(this.devFilePath) && this.infoModified.isBefore(this.devModified)) ||
-                (Objects.nonNull(this.prodFilePath) && this.infoModified.isBefore(this.prodModified));
     }
 }
