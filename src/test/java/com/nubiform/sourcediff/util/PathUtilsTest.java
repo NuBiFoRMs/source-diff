@@ -7,6 +7,18 @@ import static org.assertj.core.api.Assertions.assertThat;
 class PathUtilsTest {
 
     @Test
+    void removePrefix() {
+        String path = PathUtils.removePrefix("/test/test", "test");
+        assertThat(path).isEqualTo("/test");
+
+        path = PathUtils.removePrefix("/test/test", "/test/test");
+        assertThat(path).isEqualTo("");
+
+        path = PathUtils.removePrefix("/test/test", "");
+        assertThat(path).isEqualTo("/test/test");
+    }
+
+    @Test
     void highlight() {
         String highlight = PathUtils.highlight("asearchbSearchc", "search", s -> "<i>" + s + "</i>");
         assertThat(highlight).isEqualTo("a<i>search</i>b<i>Search</i>c");
