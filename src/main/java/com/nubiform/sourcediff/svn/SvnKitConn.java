@@ -1,9 +1,12 @@
 package com.nubiform.sourcediff.svn;
 
+import com.nubiform.sourcediff.constant.FileType;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 import org.tmatesoft.svn.core.SVNDepth;
 import org.tmatesoft.svn.core.SVNLogEntry;
+import org.tmatesoft.svn.core.SVNNodeKind;
 import org.tmatesoft.svn.core.SVNURL;
 import org.tmatesoft.svn.core.auth.ISVNAuthenticationManager;
 import org.tmatesoft.svn.core.internal.wc.DefaultSVNOptions;
@@ -16,9 +19,12 @@ import java.io.File;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Slf4j
+@Profile("!test")
 @Component
 public class SvnKitConn implements SvnConnector {
 
@@ -146,6 +152,15 @@ public class SvnKitConn implements SvnConnector {
                         .atZone(ZoneId.systemDefault())
                         .toLocalDateTime())
                 .message(svnLogEntry.getMessage())
+                .path(svnLogEntry.getChangedPaths().entrySet()
+                        .stream()
+                        .map(Map.Entry::getValue)
+                        .map(svnLogEntryPath -> SvnLog.Path.builder()
+                                .fileType(svnLogEntryPath.getKind().equals(SVNNodeKind.FILE) ? FileType.FILE : svnLogEntryPath.getKind().equals(SVNNodeKind.DIR) ? FileType.DIRECTORY : null)
+                                .action(String.valueOf(svnLogEntryPath.getType()))
+                                .filePath(svnLogEntryPath.getPath())
+                                .build())
+                        .collect(Collectors.toList()))
                 .build();
     }
 }

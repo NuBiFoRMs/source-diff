@@ -9,7 +9,10 @@ import com.nubiform.sourcediff.constant.FileType;
 import com.nubiform.sourcediff.constant.SourceType;
 import com.nubiform.sourcediff.repository.FileEntity;
 import com.nubiform.sourcediff.repository.FileRepository;
+import com.nubiform.sourcediff.repository.SvnLogEntity;
+import com.nubiform.sourcediff.repository.SvnLogRepository;
 import com.nubiform.sourcediff.svn.SvnConnector;
+import com.nubiform.sourcediff.svn.SvnInfo;
 import com.nubiform.sourcediff.svn.SvnLog;
 import com.nubiform.sourcediff.util.PathUtils;
 import lombok.RequiredArgsConstructor;
@@ -37,6 +40,7 @@ public class ScanService {
     private final SvnConnector svnConnector;
 
     private final FileRepository fileRepository;
+    private final SvnLogRepository svnLogRepository;
 
     private final FilenameFilter filenameFilter;
 
@@ -231,5 +235,47 @@ public class ScanService {
                 .filter(repo -> repo.getName().equals(repository))
                 .findFirst()
                 .orElseThrow(RuntimeException::new);
+    }
+
+    @Transactional
+    public void scanSvnInfo(AppProperties.RepositoryProperties repositoryProperties) {
+        log.info("start scanSvnInfo: {}", repositoryProperties.getName());
+
+        File devPath = new File(repositoryProperties.getName() + PathUtils.SEPARATOR + SourceType.DEV);
+        File prodPath = new File(repositoryProperties.getName() + PathUtils.SEPARATOR + SourceType.PROD);
+
+        SvnInfo devSvnInfo = svnConnector.svnInfo(devPath, repositoryProperties.getDevUsername(), repositoryProperties.getDevPassword());
+        SvnInfo prodSvnInfo = svnConnector.svnInfo(prodPath, repositoryProperties.getProdUsername(), repositoryProperties.getProdPassword());
+        log.debug("devSvnInfo: {}", devSvnInfo);
+        log.debug("prodSvnInfo: {}", prodSvnInfo);
+
+        String devPrefix = PathUtils.removePrefix(devSvnInfo.getUrl(), devSvnInfo.getRoot());
+        String prodPrefix = PathUtils.removePrefix(prodSvnInfo.getUrl(), prodSvnInfo.getRoot());
+        log.debug("devPrefix: {}, prodPrefix: {}", devPrefix, prodPrefix);
+
+        List<SvnLog> devLog = svnConnector.log(devPath, 0, repositoryProperties.getDevUsername(), repositoryProperties.getDevPassword());
+        List<SvnLog> prodLog = svnConnector.log(prodPath, 0, repositoryProperties.getProdUsername(), repositoryProperties.getProdPassword());
+
+        devLog.forEach(svnLog -> saveLog(repositoryProperties.getName(), SourceType.DEV, devPrefix, svnLog));
+        prodLog.forEach(svnLog -> saveLog(repositoryProperties.getName(), SourceType.PROD, prodPrefix, svnLog));
+
+        ScanService.log.info("finish scanSvnInfo: {}", repositoryProperties.getName());
+    }
+
+    private void saveLog(String repository, SourceType sourceType, String prefix, SvnLog svnLog) {
+        String repositoryPrefix = PathUtils.SEPARATOR + repository;
+        svnLog.getPath()
+                .stream()
+                .map(path -> SvnLogEntity.builder()
+                        .repository(repository)
+                        .sourceType(sourceType.toString())
+                        .filePath(PathUtils.connectPath(repositoryPrefix, PathUtils.removePrefix(path.getFilePath(), prefix)))
+                        .fileType(path.getFileType())
+                        .revision(svnLog.getRevision())
+                        .message(svnLog.getMessage())
+                        .commitTime(svnLog.getDate())
+                        .author(svnLog.getAuthor())
+                        .build())
+                .forEach(svnLogRepository::save);
     }
 }

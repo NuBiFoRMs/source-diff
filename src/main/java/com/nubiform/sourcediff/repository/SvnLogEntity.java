@@ -1,6 +1,5 @@
 package com.nubiform.sourcediff.repository;
 
-import com.nubiform.sourcediff.constant.SourceType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -16,7 +15,7 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "svn_logs",
         uniqueConstraints = {
-                @UniqueConstraint(columnNames = {"repository", "filePath"})
+                @UniqueConstraint(columnNames = {"repository", "sourceType", "revision", "filePath"})
         })
 public class SvnLogEntity {
 
@@ -26,13 +25,13 @@ public class SvnLogEntity {
 
     private String repository;
 
-    private SourceType sourceType;
+    private String sourceType;
+
+    private Long revision;
 
     private String filePath;
 
     private String fileType;
-
-    private String revision;
 
     @Column(length = 500)
     private String message;

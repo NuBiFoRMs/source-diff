@@ -81,6 +81,19 @@ public class ApiController {
     }
 
     @ResponseBody
+    @GetMapping("/svn-info-scan")
+    public ResponseEntity<ApiResponse<Object>> batchSvnInfoScan() {
+        log.info("request: {}", "/svn-info-scan");
+
+        batchService.svnInfoScan();
+
+        return ResponseEntity
+                .ok(ApiResponse.builder()
+                        .message("success")
+                        .build());
+    }
+
+    @ResponseBody
     @GetMapping("/svn-info")
     public ResponseEntity<ApiResponse<Object>> batchSvnInfo() {
         log.info("request: {}", "/scan");

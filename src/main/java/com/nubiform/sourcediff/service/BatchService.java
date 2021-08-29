@@ -30,6 +30,15 @@ public class BatchService {
         log.info("finish batch: scan");
     }
 
+    @Scheduled(fixedDelayString = "${batch.svn-info-scan}")
+    public void svnInfoScan() {
+        log.info("start batch: svnInfoScan");
+        appProperties.getRepositories()
+                .parallelStream()
+                .forEach(scanService::scanSvnInfo);
+        log.info("finish batch: svnInfoScan");
+    }
+
     @Scheduled(fixedDelayString = "${batch.svn-info}")
     public void svnInfo() {
         log.info("start batch: svnInfo");

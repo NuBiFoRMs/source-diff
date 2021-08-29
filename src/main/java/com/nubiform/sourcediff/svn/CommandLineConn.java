@@ -1,8 +1,10 @@
 package com.nubiform.sourcediff.svn;
 
+import com.nubiform.sourcediff.constant.FileType;
 import com.nubiform.sourcediff.util.SvnUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -118,11 +120,17 @@ public class CommandLineConn implements SvnConnector {
             String msg = logEntryElement.getElementsByTagName(MSG).item(0).getTextContent();
 
             NodeList pathList = logEntryElement.getElementsByTagName(PATH);
-            List<String> path = new ArrayList<>();
+            List<SvnLog.Path> path = new ArrayList<>();
             for (int j = 0; j < pathList.getLength(); j++) {
                 Element pathElement = (Element) pathList.item(j);
-                String textContent = pathElement.getTextContent();
-                path.add(textContent);
+                String fileType = pathElement.getAttribute("kind");
+                String action = pathElement.getAttribute("action");
+                String filePath = pathElement.getTextContent();
+                path.add(SvnLog.Path.builder()
+                        .fileType(StringUtils.equals("file", fileType) ? FileType.FILE : StringUtils.equals("dir", fileType) ? FileType.DIRECTORY : null)
+                        .action(action)
+                        .filePath(filePath)
+                        .build());
             }
 
             svnLogList.add(SvnLog.builder()
@@ -133,6 +141,7 @@ public class CommandLineConn implements SvnConnector {
                             .withZoneSameInstant(ZoneId.systemDefault())
                             .toLocalDateTime())
                     .message(msg)
+                    .path(path)
                     .build());
         }
 
