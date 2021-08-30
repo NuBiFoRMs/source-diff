@@ -46,24 +46,22 @@ public class ScanService {
 
     @Transactional
     public void scan(AppProperties.RepositoryProperties repositoryProperties) {
-        log.info("start scan: {}", repositoryProperties.getName());
+        log.debug("start scan: {}", repositoryProperties.getName());
 
         File devPath = new File(repositoryProperties.getName() + PathUtils.SEPARATOR + SourceType.DEV);
         File prodPath = new File(repositoryProperties.getName() + PathUtils.SEPARATOR + SourceType.PROD);
 
         log.debug("svn checkUpdate");
-        long devLocalRevision = svnConnector.getBaseRevision(devPath, repositoryProperties.getDevUsername(), repositoryProperties.getDevPassword());
         long devServerRevision = svnConnector.getHeadRevision(repositoryProperties.getDevUrl(), repositoryProperties.getDevUsername(), repositoryProperties.getDevPassword());
-        long prodLocalRevision = svnConnector.getBaseRevision(prodPath, repositoryProperties.getProdUsername(), repositoryProperties.getProdPassword());
         long prodServerRevision = svnConnector.getHeadRevision(repositoryProperties.getProdUrl(), repositoryProperties.getProdUsername(), repositoryProperties.getProdPassword());
 
-        Long devLogRevision = svnLogRepository.findLastRevisionByRepositoryAndSourceType(repositoryProperties.getName(), SourceType.DEV.toString()).orElse(0L);
-        Long prodLogRevision = svnLogRepository.findLastRevisionByRepositoryAndSourceType(repositoryProperties.getName(), SourceType.PROD.toString()).orElse(0L);
+        long devLogRevision = svnLogRepository.findLastRevisionByRepositoryAndSourceType(repositoryProperties.getName(), SourceType.DEV.toString()).orElse(0L);
+        long prodLogRevision = svnLogRepository.findLastRevisionByRepositoryAndSourceType(repositoryProperties.getName(), SourceType.PROD.toString()).orElse(0L);
 
         log.debug("devLogRevision: {}, prodLogRevision: {}", devLogRevision, prodLogRevision);
 
-        boolean devUpdate = checkUpdate(devLocalRevision, devServerRevision);
-        boolean prodUpdate = checkUpdate(prodLocalRevision, prodServerRevision);
+        boolean devUpdate = checkUpdate(devLogRevision, devServerRevision);
+        boolean prodUpdate = checkUpdate(prodLogRevision, prodServerRevision);
 
         if (devUpdate) {
             log.debug("svn checkout dev");
@@ -90,17 +88,17 @@ public class ScanService {
             detailScan(PathUtils.SEPARATOR + repositoryProperties.getName());
         }
 
-        if (devLogRevision < devServerRevision) {
+        if (devUpdate) {
             log.debug("svn log dev");
             scanSvnInfo(repositoryProperties.getName(), SourceType.DEV, String.valueOf(devLogRevision == 0 ? 0 : devLogRevision + 1), "BASE", repositoryProperties.getDevUsername(), repositoryProperties.getDevPassword());
         }
 
-        if (prodLogRevision < prodServerRevision) {
+        if (prodUpdate) {
             log.debug("svn log prod");
             scanSvnInfo(repositoryProperties.getName(), SourceType.PROD, String.valueOf(prodLogRevision == 0 ? 0 : prodLogRevision + 1), "BASE", repositoryProperties.getProdUsername(), repositoryProperties.getDevPassword());
         }
 
-        log.info("finish scan: {}", repositoryProperties.getName());
+        log.debug("finish scan: {}", repositoryProperties.getName());
     }
 
     private boolean checkUpdate(long localRevision, long serverRevision) {
@@ -225,7 +223,7 @@ public class ScanService {
 
     @Transactional
     public void scanSvnInfo(AppProperties.RepositoryProperties repositoryProperties) {
-        log.info("start scanSvnInfo: {}", repositoryProperties.getName());
+        log.debug("start scanSvnInfo: {}", repositoryProperties.getName());
 
         svnLogRepository.deleteAll();
         svnLogRepository.flush();
@@ -233,7 +231,7 @@ public class ScanService {
         scanSvnInfo(repositoryProperties.getName(), SourceType.DEV, "0", "BASE", repositoryProperties.getDevUsername(), repositoryProperties.getDevPassword());
         scanSvnInfo(repositoryProperties.getName(), SourceType.PROD, "0", "BASE", repositoryProperties.getProdUsername(), repositoryProperties.getProdPassword());
 
-        ScanService.log.info("finish scanSvnInfo: {}", repositoryProperties.getName());
+        log.debug("finish scanSvnInfo: {}", repositoryProperties.getName());
     }
 
     @Transactional

@@ -14,7 +14,7 @@ import java.time.format.DateTimeFormatter;
 @Data
 public class SvnInfoResponse {
 
-    private String revision;
+    private Long revision;
 
     private String author;
 
@@ -23,6 +23,6 @@ public class SvnInfoResponse {
     private String message;
 
     public String getSvnInfo() {
-        return String.format("%s [%s]", this.revision, this.commitTime.format(DateTimeFormatter.ISO_DATE));
+        return String.format("%d [%s]", this.revision, this.commitTime.format(DateTimeFormatter.ISO_DATE));
     }
 }

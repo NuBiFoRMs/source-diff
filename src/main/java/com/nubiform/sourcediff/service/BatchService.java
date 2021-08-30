@@ -21,19 +21,11 @@ public class BatchService {
 
     @Scheduled(fixedDelayString = "${scheduler.scan}")
     public void scan() {
-        log.info("start batch: scan");
+        log.debug("start batch: scan");
         appProperties.getRepositories()
                 .parallelStream()
                 .forEach(scanService::scan);
-        log.info("finish batch: scan");
-    }
-
-    public void svnInfoScan() {
-        log.info("start batch: svnInfoScan");
-        appProperties.getRepositories()
-                .parallelStream()
-                .forEach(scanService::scanSvnInfo);
-        log.info("finish batch: svnInfoScan");
+        log.debug("finish batch: scan");
     }
 
     @Scheduled(cron = "${scheduler.mailing}")

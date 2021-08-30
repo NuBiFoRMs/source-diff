@@ -12,7 +12,6 @@ import com.nubiform.sourcediff.vo.DiffResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
@@ -33,21 +32,21 @@ public class DiffService {
 
     private final FileRepository fileRepository;
 
-    public List<DiffResponse> getDiff(String path, String devRevision, String prodRevision) throws IOException {
+    public List<DiffResponse> getDiff(String path, Long devRevision, Long prodRevision) throws IOException {
         FileEntity fileEntity = fileRepository.findByFilePathAndFileType(path, FileType.FILE)
                 .orElseThrow(RuntimeException::new);
 
         List<String> devSource = null;
         List<String> prodSource = null;
 
-        if (StringUtils.isNotBlank(devRevision)) {
-            devSource = historyService.exportFile(path, SourceType.DEV, devRevision);
+        if (devRevision >= 0 && fileEntity.getDevRevision() > devRevision) {
+            devSource = historyService.exportFile(path, SourceType.DEV, String.valueOf(devRevision));
         } else if (Objects.nonNull(fileEntity.getDevFilePath())) {
             devSource = FileUtils.readLines(new File(fileEntity.getDevFilePath()), StandardCharsets.UTF_8);
         }
 
-        if (StringUtils.isNotBlank(prodRevision)) {
-            prodSource = historyService.exportFile(path, SourceType.PROD, prodRevision);
+        if (prodRevision >= 0 && fileEntity.getProdRevision() > prodRevision) {
+            prodSource = historyService.exportFile(path, SourceType.PROD, String.valueOf(prodRevision));
         } else if (Objects.nonNull(fileEntity.getProdFilePath())) {
             prodSource = FileUtils.readLines(new File(fileEntity.getProdFilePath()), StandardCharsets.UTF_8);
         }
@@ -62,14 +61,14 @@ public class DiffService {
         return getDiff(devSource, prodSource);
     }
 
-    public List<DiffResponse> getDiff(List<String> devSource, List<String> prodSource) {
+    public List<DiffResponse> getDiff(List<String> revisedSource, List<String> originalSource) {
         DiffRowGenerator diffRowGenerator = DiffRowGenerator.create()
                 .inlineDiffByWord(true)
                 .showInlineDiffs(true)
                 .ignoreWhiteSpaces(true)
                 .build();
 
-        List<DiffRow> diffRows = diffRowGenerator.generateDiffRows(prodSource, devSource);
+        List<DiffRow> diffRows = diffRowGenerator.generateDiffRows(originalSource, revisedSource);
         List<DiffResponse> diffResponseList = new ArrayList<>(diffRows.size());
 
         int line = 1;

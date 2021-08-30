@@ -80,10 +80,15 @@ public class HistoryService {
     public List<SvnInfoResponse> getRevisionList(String path, SourceType sourceType) {
         List<SvnInfoResponse> collect = svnLogRepository.findAllByFilePathAndSourceTypeOrderByRevisionDesc(path, sourceType.toString())
                 .stream()
-                .skip(1)
                 .limit(20)
                 .map(svnLog -> modelMapper.map(svnLog, SvnInfoResponse.class))
                 .collect(Collectors.toList());
         return collect;
+    }
+
+    public Long getLastRevision(String path, SourceType sourceType) {
+        return fileRepository.findByFilePath(path)
+                .map(fileEntity -> SourceType.DEV.equals(sourceType) ? fileEntity.getDevRevision() : SourceType.PROD.equals(sourceType) ? fileEntity.getProdRevision() : null)
+                .orElse(-1L);
     }
 }
