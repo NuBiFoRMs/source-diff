@@ -78,7 +78,7 @@ public class HistoryService {
     }
 
     public List<SvnInfoResponse> getRevisionList(String path, SourceType sourceType) {
-        List<SvnInfoResponse> collect = svnLogRepository.findAllByFilePathAndSourceTypeOrderByRevisionDesc(path, sourceType.toString())
+        List<SvnInfoResponse> collect = svnLogRepository.findAllRevision(path, sourceType.toString())
                 .stream()
                 .limit(20)
                 .map(svnLog -> modelMapper.map(svnLog, SvnInfoResponse.class))
