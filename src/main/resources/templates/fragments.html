@@ -82,18 +82,18 @@
                 </select>
                 <select class="form-select form-select-sm" name="dev" th:if="${DEVRevision.size() > 0}">
                     <th:block th:each="info : ${DEVRevision}">
-                        <option th:value="${info.revision}" th:text="${info.getSvnInfo()}" th:selected="${info.revision == selectedDev}">info</option>
+                        <option th:value="${info.revision}" th:text="${info.getSvnInfo()}" th:selected="${info.revision == dev}">info</option>
                     </th:block>
                 </select>
             </div>
             <div>Prod</div>
             <div class="mx-2">
-                <select class="form-select form-select-sm" name="prod" th:if="${PRODRevision.size == 0}">
+                <select class="form-select form-select-sm" name="prod" th:if="${PRODRevision.size() == 0}">
                     <option value="">NONE</option>
                 </select>
-                <select class="form-select form-select-sm" name="prod" th:if="${PRODRevision.size > 0}">
+                <select class="form-select form-select-sm" name="prod" th:if="${PRODRevision.size() > 0}">
                     <th:block th:each="info : ${PRODRevision}">
-                        <option th:value="${info.revision}" th:text="${info.getSvnInfo()}" th:selected="${info.revision == selectedProd}">info</option>
+                        <option th:value="${info.revision}" th:text="${info.getSvnInfo()}" th:selected="${info.revision == prod}">info</option>
                     </th:block>
                 </select>
             </div>

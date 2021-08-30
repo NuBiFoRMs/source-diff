@@ -61,14 +61,14 @@ public class DiffService {
         return getDiff(devSource, prodSource);
     }
 
-    public List<DiffResponse> getDiff(List<String> devSource, List<String> prodSource) {
+    public List<DiffResponse> getDiff(List<String> revisedSource, List<String> originalSource) {
         DiffRowGenerator diffRowGenerator = DiffRowGenerator.create()
                 .inlineDiffByWord(true)
                 .showInlineDiffs(true)
                 .ignoreWhiteSpaces(true)
                 .build();
 
-        List<DiffRow> diffRows = diffRowGenerator.generateDiffRows(prodSource, devSource);
+        List<DiffRow> diffRows = diffRowGenerator.generateDiffRows(originalSource, revisedSource);
         List<DiffResponse> diffResponseList = new ArrayList<>(diffRows.size());
 
         int line = 1;

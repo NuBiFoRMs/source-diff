@@ -14,7 +14,7 @@ import java.time.format.DateTimeFormatter;
 @Data
 public class SvnInfoResponse {
 
-    private String revision;
+    private Long revision;
 
     private String author;
 

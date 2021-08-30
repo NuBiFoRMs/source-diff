@@ -153,8 +153,6 @@ public class DiffController {
                 .forEach(sourceType -> {
                     model.addAttribute(sourceType + "Revision", historyService.getRevisionList(path, sourceType));
                 });
-        model.addAttribute("selectedDev", dev);
-        model.addAttribute("selectedProd", prod);
 
         List<DiffResponse> diffResponseList = diffService.getDiff(path, dev, prod);
 
