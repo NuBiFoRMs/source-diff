@@ -23,6 +23,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
@@ -126,21 +127,29 @@ public class DiffController {
 
     @GetMapping(VIEW_URI + REPOSITORY_PATH + ANT_PATTERN)
     public String view(@PathVariable String repository,
-                       @RequestParam(required = false) String dev,
-                       @RequestParam(required = false) String prod,
-                       Model model, HttpServletRequest request) throws IOException {
+                       @RequestParam(required = false) Long dev,
+                       @RequestParam(required = false) Long prod,
+                       Model model, HttpServletRequest request,
+                       RedirectAttributes redirectAttributes) throws IOException {
         String path = PathUtils.removePrefix(request.getRequestURI(), VIEW_URI);
         log.info("request: {}, repository: {}, path: {}, dev: {}, prod: {}", VIEW_URI, repository, path, dev, prod);
 
+        if (Objects.isNull(dev) || Objects.isNull(prod)) {
+            redirectAttributes.addAttribute("dev", historyService.getLastRevision(path, SourceType.DEV));
+            redirectAttributes.addAttribute("prod", historyService.getLastRevision(path, SourceType.PROD));
+            return "redirect:" + VIEW_URI + path;
+        }
+
         model.addAttribute("path", path);
         model.addAttribute("parentPath", directoryService.getParentPath(path));
+        model.addAttribute("dev", dev);
+        model.addAttribute("prod", prod);
 
         List<SourceType> sourceTypes = new ArrayList<>();
         sourceTypes.add(SourceType.DEV);
         sourceTypes.add(SourceType.PROD);
         sourceTypes
                 .stream()
-                .parallel()
                 .forEach(sourceType -> {
                     model.addAttribute(sourceType + "Revision", historyService.getRevisionList(path, sourceType));
                 });

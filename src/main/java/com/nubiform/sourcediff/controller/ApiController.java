@@ -2,8 +2,8 @@ package com.nubiform.sourcediff.controller;
 
 import com.nubiform.sourcediff.config.AppProperties;
 import com.nubiform.sourcediff.mail.MailMessage;
-import com.nubiform.sourcediff.service.BatchService;
 import com.nubiform.sourcediff.service.MailService;
+import com.nubiform.sourcediff.service.ScanService;
 import com.nubiform.sourcediff.vo.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,12 +17,14 @@ public class ApiController {
 
     public static final String MAILING_URI = "/mailing";
     public static final String MAIL_URI = "/mail";
+    public static final String SCAN_URI = "/scan";
+    public static final String SVN_INFO_SCAN_URI = "/svn-info-scan";
     public static final String REPOSITORY_PATH = "/{repository}";
 
     private final AppProperties appProperties;
 
     private final MailService mailService;
-    private final BatchService batchService;
+    private final ScanService scanService;
 
     @GetMapping(MAILING_URI)
     public ResponseEntity<ApiResponse<Object>> mailing() {
@@ -68,11 +70,13 @@ public class ApiController {
     }
 
     @ResponseBody
-    @GetMapping("/scan")
+    @GetMapping(SCAN_URI)
     public ResponseEntity<ApiResponse<Object>> batchScan() {
-        log.info("request: {}", "/scan");
+        log.info("request: {}", SCAN_URI);
 
-        batchService.scan();
+        appProperties.getRepositories()
+                .parallelStream()
+                .forEach(scanService::scan);
 
         return ResponseEntity
                 .ok(ApiResponse.builder()
@@ -81,11 +85,30 @@ public class ApiController {
     }
 
     @ResponseBody
-    @GetMapping("/svn-info-scan")
-    public ResponseEntity<ApiResponse<Object>> batchSvnInfoScan() {
-        log.info("request: {}", "/svn-info-scan");
+    @GetMapping(SCAN_URI + REPOSITORY_PATH)
+    public ResponseEntity<ApiResponse<Object>> batchScan(@PathVariable String repository) {
+        log.info("request: {}", SCAN_URI);
 
-        batchService.svnInfoScan();
+        appProperties.getRepositories()
+                .stream()
+                .filter(repo -> repo.getName().equals(repository))
+                .findFirst()
+                .ifPresent(scanService::scan);
+
+        return ResponseEntity
+                .ok(ApiResponse.builder()
+                        .message("success")
+                        .build());
+    }
+
+    @ResponseBody
+    @GetMapping(SVN_INFO_SCAN_URI)
+    public ResponseEntity<ApiResponse<Object>> batchSvnInfoScan() {
+        log.info("request: {}", SVN_INFO_SCAN_URI);
+
+        appProperties.getRepositories()
+                .parallelStream()
+                .forEach(scanService::scanSvnInfo);
 
         return ResponseEntity
                 .ok(ApiResponse.builder()
