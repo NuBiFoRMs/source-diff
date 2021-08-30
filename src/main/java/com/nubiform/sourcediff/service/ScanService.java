@@ -52,9 +52,7 @@ public class ScanService {
         File prodPath = new File(repositoryProperties.getName() + PathUtils.SEPARATOR + SourceType.PROD);
 
         log.debug("svn checkUpdate");
-        long devLocalRevision = svnConnector.getBaseRevision(devPath, repositoryProperties.getDevUsername(), repositoryProperties.getDevPassword());
         long devServerRevision = svnConnector.getHeadRevision(repositoryProperties.getDevUrl(), repositoryProperties.getDevUsername(), repositoryProperties.getDevPassword());
-        long prodLocalRevision = svnConnector.getBaseRevision(prodPath, repositoryProperties.getProdUsername(), repositoryProperties.getProdPassword());
         long prodServerRevision = svnConnector.getHeadRevision(repositoryProperties.getProdUrl(), repositoryProperties.getProdUsername(), repositoryProperties.getProdPassword());
 
         long devLogRevision = svnLogRepository.findLastRevisionByRepositoryAndSourceType(repositoryProperties.getName(), SourceType.DEV.toString()).orElse(0L);
