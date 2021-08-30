@@ -1,5 +1,6 @@
 package com.nubiform.sourcediff.repository;
 
+import com.nubiform.sourcediff.constant.SourceType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -68,5 +69,13 @@ public class FileEntity {
         return Objects.isNull(this.scanModified) ||
                 (Objects.nonNull(this.devFilePath) && this.scanModified.isBefore(this.devModified)) ||
                 (Objects.nonNull(this.prodFilePath) && this.scanModified.isBefore(this.prodModified));
+    }
+
+    public String getFilePath(SourceType sourceType) {
+        return SourceType.DEV.equals(sourceType) ? devFilePath : prodFilePath;
+    }
+
+    public Long getRevision(SourceType sourceType) {
+        return SourceType.DEV.equals(sourceType) ? devRevision : prodRevision;
     }
 }

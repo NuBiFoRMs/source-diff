@@ -27,7 +27,6 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -127,34 +126,59 @@ public class DiffController {
 
     @GetMapping(VIEW_URI + REPOSITORY_PATH + ANT_PATTERN)
     public String view(@PathVariable String repository,
-                       @RequestParam(required = false) Long dev,
-                       @RequestParam(required = false) Long prod,
+                       @RequestParam(required = false) SourceType revisedType,
+                       @RequestParam(required = false) Long revised,
+                       @RequestParam(required = false) SourceType originalType,
+                       @RequestParam(required = false) Long original,
                        Model model, HttpServletRequest request,
                        RedirectAttributes redirectAttributes) throws IOException {
         String path = PathUtils.removePrefix(request.getRequestURI(), VIEW_URI);
-        log.info("request: {}, repository: {}, path: {}, dev: {}, prod: {}", VIEW_URI, repository, path, dev, prod);
+        log.info("request: {}, repository: {}, path: {}, revisedType: {}, revised: {}, originalType: {}, original: {}", VIEW_URI, repository, path, revisedType, revised, originalType, original);
 
-        if (Objects.isNull(dev) || Objects.isNull(prod)) {
-            redirectAttributes.addAttribute("dev", historyService.getLastRevision(path, SourceType.DEV));
-            redirectAttributes.addAttribute("prod", historyService.getLastRevision(path, SourceType.PROD));
+        if (Objects.isNull(revisedType) || Objects.isNull(originalType)) {
+            redirectAttributes.addAttribute("revisedType", SourceType.DEV);
+            redirectAttributes.addAttribute("originalType", SourceType.PROD);
+            redirectAttributes.addAttribute("revised", historyService.getLastRevision(path, SourceType.DEV));
+            redirectAttributes.addAttribute("original", historyService.getLastRevision(path, SourceType.PROD));
+            return "redirect:" + VIEW_URI + path;
+        }
+
+        if (Objects.isNull(revised) || Objects.isNull(original)) {
+            redirectAttributes.addAttribute("revisedType", revisedType);
+            redirectAttributes.addAttribute("originalType", originalType);
+            redirectAttributes.addAttribute("revised", Objects.isNull(revised) ? historyService.getLastRevision(path, revisedType) : revised);
+            redirectAttributes.addAttribute("original", Objects.isNull(original) ? historyService.getLastRevision(path, originalType) : original);
+            return "redirect:" + VIEW_URI + path;
+        }
+
+        if (revised == -1 && !revised.equals(historyService.getLastRevision(path, revisedType))) {
+            redirectAttributes.addAttribute("revisedType", revisedType);
+            redirectAttributes.addAttribute("originalType", originalType);
+            redirectAttributes.addAttribute("revised", historyService.getLastRevision(path, revisedType));
+            redirectAttributes.addAttribute("original", original);
+            return "redirect:" + VIEW_URI + path;
+        }
+
+        if (original == -1 && !original.equals(historyService.getLastRevision(path, originalType))) {
+            redirectAttributes.addAttribute("revisedType", revisedType);
+            redirectAttributes.addAttribute("originalType", originalType);
+            redirectAttributes.addAttribute("revised", revised);
+            redirectAttributes.addAttribute("original", historyService.getLastRevision(path, originalType));
             return "redirect:" + VIEW_URI + path;
         }
 
         model.addAttribute("path", path);
         model.addAttribute("parentPath", directoryService.getParentPath(path));
-        model.addAttribute("dev", dev);
-        model.addAttribute("prod", prod);
+        model.addAttribute("revisedType", revisedType);
+        model.addAttribute("originalType", originalType);
+        model.addAttribute("revised", revised);
+        model.addAttribute("original", original);
+        model.addAttribute("revisedRevision", historyService.getRevisionList(path, revisedType));
+        model.addAttribute("originalRevision", historyService.getRevisionList(path, originalType));
+        model.addAttribute("mode", revisedType.equals(originalType) ? SourceType.DEV.equals(revisedType) ? "DEV" : "PROD" : "DEFAULT");
 
-        List<SourceType> sourceTypes = new ArrayList<>();
-        sourceTypes.add(SourceType.DEV);
-        sourceTypes.add(SourceType.PROD);
-        sourceTypes
-                .stream()
-                .forEach(sourceType -> {
-                    model.addAttribute(sourceType + "Revision", historyService.getRevisionList(path, sourceType));
-                });
 
-        List<DiffResponse> diffResponseList = diffService.getDiff(path, dev, prod);
+        List<DiffResponse> diffResponseList = diffService.getDiff(path, revisedType, revised, originalType, original);
 
         if (diffResponseList.stream()
                 .anyMatch(diffResponse -> !DiffType.EQUAL.equals(diffResponse.getChangeType()) && !DiffType.SKIP.equals(diffResponse.getChangeType()))) {

@@ -32,33 +32,33 @@ public class DiffService {
 
     private final FileRepository fileRepository;
 
-    public List<DiffResponse> getDiff(String path, Long devRevision, Long prodRevision) throws IOException {
+    public List<DiffResponse> getDiff(String path, SourceType revisedType, Long revised, SourceType originalType, Long original) throws IOException {
         FileEntity fileEntity = fileRepository.findByFilePathAndFileType(path, FileType.FILE)
                 .orElseThrow(RuntimeException::new);
 
-        List<String> devSource = null;
-        List<String> prodSource = null;
+        List<String> revisedSource = null;
+        List<String> originalSource = null;
 
-        if (devRevision >= 0 && fileEntity.getDevRevision() > devRevision) {
-            devSource = historyService.exportFile(path, SourceType.DEV, String.valueOf(devRevision));
-        } else if (Objects.nonNull(fileEntity.getDevFilePath())) {
-            devSource = FileUtils.readLines(new File(fileEntity.getDevFilePath()), StandardCharsets.UTF_8);
+        if (revised >= 0 && fileEntity.getRevision(revisedType) > revised) {
+            revisedSource = historyService.exportFile(path, revisedType, String.valueOf(revised));
+        } else if (Objects.nonNull(fileEntity.getFilePath(revisedType))) {
+            revisedSource = FileUtils.readLines(new File(fileEntity.getFilePath(revisedType)), StandardCharsets.UTF_8);
         }
 
-        if (prodRevision >= 0 && fileEntity.getProdRevision() > prodRevision) {
-            prodSource = historyService.exportFile(path, SourceType.PROD, String.valueOf(prodRevision));
-        } else if (Objects.nonNull(fileEntity.getProdFilePath())) {
-            prodSource = FileUtils.readLines(new File(fileEntity.getProdFilePath()), StandardCharsets.UTF_8);
+        if (original >= 0 && fileEntity.getRevision(originalType) > original) {
+            originalSource = historyService.exportFile(path, originalType, String.valueOf(original));
+        } else if (Objects.nonNull(fileEntity.getFilePath(originalType))) {
+            originalSource = FileUtils.readLines(new File(fileEntity.getFilePath(originalType)), StandardCharsets.UTF_8);
         }
 
-        if (Objects.isNull(devSource) && Objects.isNull(prodSource))
+        if (Objects.isNull(revisedSource) && Objects.isNull(originalSource))
             throw new RuntimeException();
-        else if (Objects.nonNull(devSource) && Objects.isNull(prodSource))
-            prodSource = devSource;
-        else if (Objects.isNull(devSource) && Objects.nonNull(prodSource))
-            devSource = prodSource;
+        else if (Objects.nonNull(revisedSource) && Objects.isNull(originalSource))
+            originalSource = revisedSource;
+        else if (Objects.isNull(revisedSource) && Objects.nonNull(originalSource))
+            revisedSource = originalSource;
 
-        return getDiff(devSource, prodSource);
+        return getDiff(revisedSource, originalSource);
     }
 
     public List<DiffResponse> getDiff(List<String> revisedSource, List<String> originalSource) {
