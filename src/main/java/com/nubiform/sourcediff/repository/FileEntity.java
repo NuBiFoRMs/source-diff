@@ -78,4 +78,46 @@ public class FileEntity {
     public Long getRevision(SourceType sourceType) {
         return SourceType.DEV.equals(sourceType) ? devRevision : prodRevision;
     }
+
+    public void setFilePath(SourceType sourceType, String filePath) {
+        if (SourceType.DEV.equals(sourceType))
+            this.devFilePath = filePath;
+        else
+            this.prodFilePath = filePath;
+    }
+
+    public void setModified(SourceType sourceType, LocalDateTime modified) {
+        if (SourceType.DEV.equals(sourceType))
+            this.devModified = modified;
+        else
+            this.prodModified = modified;
+    }
+
+    public void setRevision(SourceType sourceType, Long revision) {
+        if (SourceType.DEV.equals(sourceType))
+            this.devRevision = revision;
+        else
+            this.prodRevision = revision;
+    }
+
+    public void setMessage(SourceType sourceType, String message) {
+        if (SourceType.DEV.equals(sourceType))
+            this.devMessage = message;
+        else
+            this.prodMessage = message;
+    }
+
+    public void setCommitTime(SourceType sourceType, LocalDateTime commitTime) {
+        if (SourceType.DEV.equals(sourceType))
+            this.devCommitTime = commitTime;
+        else
+            this.prodCommitTime = commitTime;
+    }
+
+    public void setAuthor(SourceType sourceType, String author) {
+        if (SourceType.DEV.equals(sourceType))
+            this.devAuthor = author;
+        else
+            this.prodAuthor = author;
+    }
 }

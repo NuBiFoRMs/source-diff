@@ -130,13 +130,8 @@ public class ScanService {
         LocalDateTime lastModified = LocalDateTime
                 .ofInstant(Instant.ofEpochMilli(baseDirectory.lastModified()), TimeZone.getDefault().toZoneId());
 
-        if (SourceType.DEV.equals(sourceType)) {
-            fileEntity.setDevFilePath(path);
-            fileEntity.setDevModified(lastModified);
-        } else {
-            fileEntity.setProdFilePath(path);
-            fileEntity.setProdModified(lastModified);
-        }
+        fileEntity.setFilePath(sourceType, path);
+        fileEntity.setModified(sourceType, lastModified);
 
         fileRepository.save(fileEntity);
         log.debug("Id : {}", fileEntity.getId());
@@ -272,18 +267,10 @@ public class ScanService {
                     svnLogRepository.save(svnLogEntity);
                     fileRepository.findByFilePath(svnLogEntity.getFilePath())
                             .ifPresent(fileEntity -> {
-                                if (SourceType.DEV.equals(sourceType)) {
-                                    fileEntity.setDevRevision(svnLogEntity.getRevision());
-                                    fileEntity.setDevMessage(svnLogEntity.getMessage());
-                                    fileEntity.setDevCommitTime(svnLogEntity.getCommitTime());
-                                    fileEntity.setDevAuthor(svnLogEntity.getAuthor());
-                                }
-                                if (SourceType.PROD.equals(sourceType)) {
-                                    fileEntity.setProdRevision(svnLogEntity.getRevision());
-                                    fileEntity.setProdMessage(svnLogEntity.getMessage());
-                                    fileEntity.setProdCommitTime(svnLogEntity.getCommitTime());
-                                    fileEntity.setProdAuthor(svnLogEntity.getAuthor());
-                                }
+                                fileEntity.setRevision(sourceType, svnLogEntity.getRevision());
+                                fileEntity.setMessage(sourceType, svnLogEntity.getMessage());
+                                fileEntity.setCommitTime(sourceType, svnLogEntity.getCommitTime());
+                                fileEntity.setAuthor(sourceType, svnLogEntity.getAuthor());
                                 fileRepository.save(fileEntity);
                             });
                 });

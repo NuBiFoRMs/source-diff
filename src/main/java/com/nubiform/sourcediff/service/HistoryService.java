@@ -88,7 +88,7 @@ public class HistoryService {
 
     public Long getLastRevision(String path, SourceType sourceType) {
         return fileRepository.findByFilePath(path)
-                .map(fileEntity -> SourceType.DEV.equals(sourceType) ? fileEntity.getDevRevision() : SourceType.PROD.equals(sourceType) ? fileEntity.getProdRevision() : null)
+                .map(fileEntity -> fileEntity.getRevision(sourceType))
                 .orElse(-1L);
     }
 }
