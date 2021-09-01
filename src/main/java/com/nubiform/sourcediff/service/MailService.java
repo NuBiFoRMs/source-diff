@@ -53,12 +53,7 @@ public class MailService {
         log.debug("message:\n{}", message);
 
         MailMessage mailMessage = MailMessage.builder()
-                .to(appProperties.getRepositories()
-                        .stream()
-                        .filter(repo -> repo.getName().equals(repository))
-                        .findFirst()
-                        .orElseThrow(RuntimeException::new)
-                        .getReceivers())
+                .to(appProperties.getRepository(repository).getReceivers())
                 .subject("Source Diff. [" + repository + "]")
                 .message(message)
                 .build();

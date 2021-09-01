@@ -53,28 +53,15 @@ public class HistoryService {
                 throw new RemoteException();
         }
 
-        AppProperties.RepositoryProperties repository = getRepository(fileEntity.getRepository());
+        AppProperties.RepositoryProperties repository = appProperties.getRepository(fileEntity.getRepository());
 
-        String url = repository.getDevUrl();
-        String username = repository.getDevUsername();
-        String password = repository.getDevPassword();
-        if (SourceType.PROD.equals(sourceType)) {
-            url = repository.getProdUrl();
-            username = repository.getProdUsername();
-            password = repository.getProdPassword();
-        }
+        String url = repository.getUrl(sourceType);
+        String username = repository.getUsername(sourceType);
+        String password = repository.getPassword(sourceType);
 
         svnConnector.export(url + path, revision, location.getParentFile(), username, password);
 
         return FileUtils.readLines(location, StandardCharsets.UTF_8);
-    }
-
-    private AppProperties.RepositoryProperties getRepository(String repository) {
-        return appProperties.getRepositories()
-                .stream()
-                .filter(repo -> repo.getName().equals(repository))
-                .findFirst()
-                .orElseThrow(RuntimeException::new);
     }
 
     public List<SvnInfoResponse> getRevisionList(String path, SourceType sourceType) {
