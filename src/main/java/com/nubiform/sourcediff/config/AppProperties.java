@@ -1,5 +1,6 @@
 package com.nubiform.sourcediff.config;
 
+import com.nubiform.sourcediff.constant.SourceType;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
@@ -35,5 +36,25 @@ public class AppProperties {
         private String prodPassword;
 
         private List<String> receivers;
+
+        public String getUrl(SourceType sourceType) {
+            return SourceType.DEV.equals(sourceType) ? devUrl : prodUrl;
+        }
+
+        public String getUsername(SourceType sourceType) {
+            return SourceType.DEV.equals(sourceType) ? devUsername : prodUsername;
+        }
+
+        public String getPassword(SourceType sourceType) {
+            return SourceType.DEV.equals(sourceType) ? devPassword : prodPassword;
+        }
+    }
+
+    public AppProperties.RepositoryProperties getRepository(String repository) {
+        return this.getRepositories()
+                .stream()
+                .filter(repo -> repo.getName().equals(repository))
+                .findFirst()
+                .orElseThrow(RuntimeException::new);
     }
 }

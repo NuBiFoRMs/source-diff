@@ -4,7 +4,7 @@ import com.github.difflib.DiffUtils;
 import com.github.difflib.patch.Patch;
 import com.github.difflib.text.DiffRow;
 import com.github.difflib.text.DiffRowGenerator;
-import com.nubiform.sourcediff.config.AppProperties;
+import com.nubiform.sourcediff.config.AppProperties.RepositoryProperties;
 import com.nubiform.sourcediff.constant.FileType;
 import com.nubiform.sourcediff.constant.SourceType;
 import com.nubiform.sourcediff.repository.FileEntity;
@@ -35,8 +35,6 @@ import java.util.stream.Stream;
 @Service
 public class ScanService {
 
-    private final AppProperties appProperties;
-
     private final SvnConnector svnConnector;
 
     private final FileRepository fileRepository;
@@ -45,15 +43,15 @@ public class ScanService {
     private final FilenameFilter filenameFilter;
 
     @Transactional
-    public void scan(AppProperties.RepositoryProperties repositoryProperties) {
+    public void scan(RepositoryProperties repositoryProperties) {
         log.debug("start scan: {}", repositoryProperties.getName());
 
         File devPath = new File(repositoryProperties.getName() + PathUtils.SEPARATOR + SourceType.DEV);
         File prodPath = new File(repositoryProperties.getName() + PathUtils.SEPARATOR + SourceType.PROD);
 
         log.debug("svn checkUpdate");
-        long devServerRevision = svnConnector.getHeadRevision(repositoryProperties.getDevUrl(), repositoryProperties.getDevUsername(), repositoryProperties.getDevPassword());
-        long prodServerRevision = svnConnector.getHeadRevision(repositoryProperties.getProdUrl(), repositoryProperties.getProdUsername(), repositoryProperties.getProdPassword());
+        long devServerRevision = getHeadRevision(repositoryProperties, SourceType.DEV);
+        long prodServerRevision = getHeadRevision(repositoryProperties, SourceType.PROD);
 
         long devLogRevision = svnLogRepository.findLastRevisionByRepositoryAndSourceType(repositoryProperties.getName(), SourceType.DEV.toString()).orElse(0L);
         long prodLogRevision = svnLogRepository.findLastRevisionByRepositoryAndSourceType(repositoryProperties.getName(), SourceType.PROD.toString()).orElse(0L);
@@ -90,15 +88,19 @@ public class ScanService {
 
         if (devUpdate) {
             log.debug("svn log dev");
-            scanSvnInfo(repositoryProperties.getName(), SourceType.DEV, String.valueOf(devLogRevision == 0 ? 0 : devLogRevision + 1), "BASE", repositoryProperties.getDevUsername(), repositoryProperties.getDevPassword());
+            scanSvnInfo(repositoryProperties, SourceType.DEV, String.valueOf(devLogRevision == 0 ? 0 : devLogRevision + 1), "BASE");
         }
 
         if (prodUpdate) {
             log.debug("svn log prod");
-            scanSvnInfo(repositoryProperties.getName(), SourceType.PROD, String.valueOf(prodLogRevision == 0 ? 0 : prodLogRevision + 1), "BASE", repositoryProperties.getProdUsername(), repositoryProperties.getDevPassword());
+            scanSvnInfo(repositoryProperties, SourceType.PROD, String.valueOf(prodLogRevision == 0 ? 0 : prodLogRevision + 1), "BASE");
         }
 
         log.debug("finish scan: {}", repositoryProperties.getName());
+    }
+
+    private long getHeadRevision(RepositoryProperties repositoryProperties, SourceType sourceType) {
+        return svnConnector.getHeadRevision(repositoryProperties.getUrl(sourceType), repositoryProperties.getUsername(sourceType), repositoryProperties.getPassword(sourceType));
     }
 
     private boolean checkUpdate(long localRevision, long serverRevision) {
@@ -130,13 +132,8 @@ public class ScanService {
         LocalDateTime lastModified = LocalDateTime
                 .ofInstant(Instant.ofEpochMilli(baseDirectory.lastModified()), TimeZone.getDefault().toZoneId());
 
-        if (SourceType.DEV.equals(sourceType)) {
-            fileEntity.setDevFilePath(path);
-            fileEntity.setDevModified(lastModified);
-        } else {
-            fileEntity.setProdFilePath(path);
-            fileEntity.setProdModified(lastModified);
-        }
+        fileEntity.setFilePath(sourceType, path);
+        fileEntity.setModified(sourceType, lastModified);
 
         fileRepository.save(fileEntity);
         log.debug("Id : {}", fileEntity.getId());
@@ -213,33 +210,26 @@ public class ScanService {
         return 0;
     }
 
-    private AppProperties.RepositoryProperties getRepository(String repository) {
-        return appProperties.getRepositories()
-                .stream()
-                .filter(repo -> repo.getName().equals(repository))
-                .findFirst()
-                .orElseThrow(RuntimeException::new);
-    }
-
     @Transactional
-    public void scanSvnInfo(AppProperties.RepositoryProperties repositoryProperties) {
+    public void scanSvnInfo(RepositoryProperties repositoryProperties) {
         log.debug("start scanSvnInfo: {}", repositoryProperties.getName());
 
         svnLogRepository.deleteAll();
         svnLogRepository.flush();
 
-        scanSvnInfo(repositoryProperties.getName(), SourceType.DEV, "0", "BASE", repositoryProperties.getDevUsername(), repositoryProperties.getDevPassword());
-        scanSvnInfo(repositoryProperties.getName(), SourceType.PROD, "0", "BASE", repositoryProperties.getProdUsername(), repositoryProperties.getProdPassword());
+        scanSvnInfo(repositoryProperties, SourceType.DEV, "0", "BASE");
+        scanSvnInfo(repositoryProperties, SourceType.PROD, "0", "BASE");
 
         log.debug("finish scanSvnInfo: {}", repositoryProperties.getName());
     }
 
-    @Transactional
-    public void scanSvnInfo(String repository, SourceType sourceType, String startRevision, String endRevision, String username, String password) {
-        log.info("scanSvnInfo: repository: {}, sourceType: {}, startRevision: {}, endRevision: {}", repository, sourceType, startRevision, endRevision);
+    private void scanSvnInfo(RepositoryProperties repositoryProperties, SourceType sourceType, String startRevision, String endRevision) {
+        log.info("scanSvnInfo: repository: {}, sourceType: {}, startRevision: {}, endRevision: {}", repositoryProperties.getName(), sourceType, startRevision, endRevision);
 
-        File path = new File(repository + PathUtils.SEPARATOR + sourceType);
+        File path = new File(repositoryProperties.getName() + PathUtils.SEPARATOR + sourceType);
 
+        String username = repositoryProperties.getUsername(sourceType);
+        String password = repositoryProperties.getPassword(sourceType);
         SvnInfo svnInfo = svnConnector.svnInfo(path, username, password);
         log.debug("svnInfo: {}", svnInfo);
 
@@ -250,7 +240,7 @@ public class ScanService {
 
         log.stream()
                 .sorted(Comparator.comparing(SvnLog::getRevision))
-                .forEach(svnLog -> saveLog(repository, sourceType, prefix, svnLog));
+                .forEach(svnLog -> saveLog(repositoryProperties.getName(), sourceType, prefix, svnLog));
     }
 
     private void saveLog(String repository, SourceType sourceType, String prefix, SvnLog svnLog) {
@@ -272,18 +262,10 @@ public class ScanService {
                     svnLogRepository.save(svnLogEntity);
                     fileRepository.findByFilePath(svnLogEntity.getFilePath())
                             .ifPresent(fileEntity -> {
-                                if (SourceType.DEV.equals(sourceType)) {
-                                    fileEntity.setDevRevision(svnLogEntity.getRevision());
-                                    fileEntity.setDevMessage(svnLogEntity.getMessage());
-                                    fileEntity.setDevCommitTime(svnLogEntity.getCommitTime());
-                                    fileEntity.setDevAuthor(svnLogEntity.getAuthor());
-                                }
-                                if (SourceType.PROD.equals(sourceType)) {
-                                    fileEntity.setProdRevision(svnLogEntity.getRevision());
-                                    fileEntity.setProdMessage(svnLogEntity.getMessage());
-                                    fileEntity.setProdCommitTime(svnLogEntity.getCommitTime());
-                                    fileEntity.setProdAuthor(svnLogEntity.getAuthor());
-                                }
+                                fileEntity.setRevision(sourceType, svnLogEntity.getRevision());
+                                fileEntity.setMessage(sourceType, svnLogEntity.getMessage());
+                                fileEntity.setCommitTime(sourceType, svnLogEntity.getCommitTime());
+                                fileEntity.setAuthor(sourceType, svnLogEntity.getAuthor());
                                 fileRepository.save(fileEntity);
                             });
                 });
