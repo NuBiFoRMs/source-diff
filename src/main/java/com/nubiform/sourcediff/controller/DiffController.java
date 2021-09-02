@@ -12,6 +12,7 @@ import com.nubiform.sourcediff.service.MailService;
 import com.nubiform.sourcediff.util.PathUtils;
 import com.nubiform.sourcediff.vo.DiffResponse;
 import com.nubiform.sourcediff.vo.FileResponse;
+import com.nubiform.sourcediff.vo.SvnInfoResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -167,16 +168,29 @@ public class DiffController {
             return "redirect:" + VIEW_URI + path;
         }
 
+        List<SvnInfoResponse> revisedRevision = historyService.getRevisionList(path, revisedType);
+        List<SvnInfoResponse> originalRevision = historyService.getRevisionList(path, originalType);
+
+        Long newRevised = getNewRevised(revisedRevision, revised);
+        Long newOriginal = getNewRevised(originalRevision, original);
+
+        if (!revised.equals(newRevised) || !original.equals(newOriginal)) {
+            redirectAttributes.addAttribute("revisedType", revisedType);
+            redirectAttributes.addAttribute("originalType", originalType);
+            redirectAttributes.addAttribute("revised", newRevised);
+            redirectAttributes.addAttribute("original", newOriginal);
+            return "redirect:" + VIEW_URI + path;
+        }
+
         model.addAttribute("path", path);
         model.addAttribute("parentPath", directoryService.getParentPath(path));
         model.addAttribute("revisedType", revisedType);
         model.addAttribute("originalType", originalType);
         model.addAttribute("revised", revised);
         model.addAttribute("original", original);
-        model.addAttribute("revisedRevision", historyService.getRevisionList(path, revisedType));
-        model.addAttribute("originalRevision", historyService.getRevisionList(path, originalType));
-        model.addAttribute("mode", revisedType.equals(originalType) ? SourceType.DEV.equals(revisedType) ? "DEV" : "PROD" : "DEFAULT");
-
+        model.addAttribute("revisedRevision", revisedRevision);
+        model.addAttribute("originalRevision", originalRevision);
+        model.addAttribute("mode", revisedType.equals(originalType) ? SourceType.DEV.equals(revisedType) ? SourceType.DEV.name() : SourceType.PROD.name() : "DEFAULT");
 
         List<DiffResponse> diffResponseList = diffService.getDiff(path, revisedType, revised, originalType, original);
 
@@ -190,6 +204,14 @@ public class DiffController {
             model.addAttribute("diff", diffResponseList);
             return "view";
         }
+    }
+
+    private Long getNewRevised(List<SvnInfoResponse> revisionList, Long revision) {
+        return revisionList
+                .stream()
+                .map(SvnInfoResponse::getRevision)
+                .filter(r -> r <= revision)
+                .findFirst().orElse(-1L);
     }
 
     @GetMapping(value = MAILING_URI, produces = MediaType.TEXT_HTML_VALUE)
