@@ -15,7 +15,7 @@ import java.time.format.DateTimeFormatter;
 @Data
 public class SvnInfoResponse {
 
-    public static final int LENGTH = 20;
+    public static final int LENGTH = 30;
 
     private Long revision;
 

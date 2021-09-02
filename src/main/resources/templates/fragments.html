@@ -97,16 +97,11 @@
         </div>
 
         <div class="mx-2 list-group-item">
-            <div class="d-flex align-items-center justify-content-between">
-                <div>
-                    <th:block th:each="line, index : ${diffList}">
-                        <a th:href="${'#' + (line - 10 < 0 ? 0 : line - 10)}" th:text="${index.count}">line</a>
-                    </th:block>
-                </div>
-                <form>
-                    <input type="hidden" name="revisedType" th:value="${revisedType}"/>
-                    <input type="hidden" name="originalType" th:value="${originalType}"/>
-                    <div class="d-flex align-items-center justify-content-between">
+            <form>
+                <input type="hidden" name="revisedType" th:value="${revisedType}"/>
+                <input type="hidden" name="originalType" th:value="${originalType}"/>
+                <div class="d-flex align-items-center justify-content-between">
+                    <div class="d-flex align-items-center justify-content-between" style="width: 100%">
                         <div class="input-group input-group-sm me-2">
                             <span class="input-group-text" th:text="${revisedType.value}">revisedType.value</span>
                             <select class="form-select form-select-sm" name="revised" th:if="${revisedRevision.size() == 0}">
@@ -118,6 +113,8 @@
                                 </th:block>
                             </select>
                         </div>
+                    </div>
+                    <div class="d-flex align-items-center justify-content-between" style="width: 100%">
                         <div class="input-group input-group-sm me-2">
                             <span class="input-group-text" th:text="${originalType.value}">Prod</span>
                             <select class="form-select form-select-sm" name="original" th:if="${originalRevision.size() == 0}">
@@ -133,7 +130,41 @@
                             <button class="btn btn-success btn-sm" type="submit">Compare</button>
                         </div>
                     </div>
-                </form>
+                </div>
+            </form>
+        </div>
+        <div class="mx-2 list-group-item">
+            <div class="d-flex align-items-center justify-content-between">
+                <div>
+                    <div class="pagination pagination-sm">
+                        <li class="page-item">
+                            <a class="page-link" href="#top">Top</a>
+                        </li>
+                        <th:block th:each="line, index : ${diffList}">
+                            <li class="page-item"><a class="page-link" th:href="${'#' + (line - 10 < 0 ? 0 : line - 10)}" th:text="${index.count}">line</a></li>
+                        </th:block>
+                        <li class="page-item">
+                            <a class="page-link" href="#bottom">Bottom</a>
+                        </li>
+                    </div>
+                </div>
+                <div>
+                    <div class="pagination pagination-sm" style="display: none">
+                        <li class="page-item">
+                            <a class="page-link" href="#" aria-label="Previous">
+                                <span aria-hidden="true">&laquo;</span>
+                            </a>
+                        </li>
+                        <li class="page-item"><a class="page-link" href="#">1</a></li>
+                        <li class="page-item"><a class="page-link" href="#">2</a></li>
+                        <li class="page-item"><a class="page-link" href="#">3</a></li>
+                        <li class="page-item">
+                            <a class="page-link" href="#" aria-label="Next">
+                                <span aria-hidden="true">&raquo;</span>
+                            </a>
+                        </li>
+                    </div>
+                </div>
             </div>
         </div>
         <div class="mx-2 list-group-item" style="display: none">
