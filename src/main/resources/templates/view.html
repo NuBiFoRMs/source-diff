@@ -6,17 +6,12 @@
 </head>
 <body>
 
-<div class="m-2 list-group" style="padding-top: 48px">
-    <div class="fixed-top" style="background-color: white">
-        <div class="mx-2 mt-2 list-group-item">
-            <div class="d-flex align-items-center justify-content-between">
-                <th:block th:replace="fragments.html :: diff-header"></th:block>
-            </div>
-        </div>
-    </div>
+<!--<div class="m-2 list-group" style="padding-top: 48px">-->
+<div class="m-2 list-group" style="padding-top: 96px">
+    <th:block th:replace="fragments.html :: diff-header"></th:block>
 
     <div class="list-group-item d-flex justify-content-between">
-        <div class="d-flex" style="width: 100%; overflow-x: hidden">
+        <div class="d-flex mt-3" style="width: 100%; overflow-x: hidden">
             <div>
                 <table class="mx-2 diffTable">
                     <th:block th:each="row : ${diff}">

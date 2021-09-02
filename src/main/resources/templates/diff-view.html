@@ -8,23 +8,11 @@
 
 <div id="0"></div>
 
-<div class="m-2 list-group" style="padding-top: 89px">
-    <div class="fixed-top" style="background-color: white">
-        <div class="mx-2 mt-2 list-group-item">
-            <div class="d-flex align-items-center justify-content-between">
-                <th:block th:replace="fragments.html :: diff-header"></th:block>
-            </div>
-        </div>
-
-        <div id="diff-nav" class="mx-2 list-group-item">
-            <th:block th:each="line, index : ${diffList}">
-                <a th:href="${'#' + (line - 10 < 0 ? 0 : line - 10)}" th:text="${index.count}">line</a>
-            </th:block>
-        </div>
-    </div>
+<div class="m-2 list-group" style="padding-top: 96px">
+    <th:block th:replace="fragments.html :: diff-header"></th:block>
 
     <div class="list-group-item d-flex justify-content-between">
-        <div class="d-flex" style="width: 100%; overflow-x: hidden">
+        <div class="d-flex mt-3" style="width: 100%; overflow-x: hidden">
             <div>
                 <table class="mx-2 diffTable">
                     <th:block th:each="row : ${diff}">
@@ -49,7 +37,7 @@
             </div>
         </div>
 
-        <div class="d-flex" style="width: 100%; overflow-x: hidden">
+        <div class="d-flex mt-3" style="width: 100%; overflow-x: hidden">
             <div>
                 <table class="mx-2 diffTable">
                     <th:block th:each="row : ${diff}">
