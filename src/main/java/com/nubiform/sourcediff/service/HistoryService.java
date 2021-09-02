@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.rmi.RemoteException;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -75,6 +76,7 @@ public class HistoryService {
 
     public Long getLastRevision(String path, SourceType sourceType) {
         return fileRepository.findByFilePath(path)
+                .filter(fileEntity -> Objects.nonNull(fileEntity.getFilePath(sourceType)))
                 .map(fileEntity -> fileEntity.getRevision(sourceType))
                 .orElse(-1L);
     }
