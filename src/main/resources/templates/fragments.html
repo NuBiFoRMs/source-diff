@@ -149,17 +149,17 @@
                     </div>
                 </div>
                 <div>
-                    <div class="pagination pagination-sm" style="display: none">
-                        <li class="page-item">
-                            <a class="page-link" href="#" aria-label="Previous">
+                    <div class="pagination pagination-sm">
+                        <li class="page-item" th:classappend="${page - 1 < 0 ? 'disabled' : ''}">
+                            <a class="page-link" th:href="@{/view{path}(path=${path}, revisedType=${param.revisedType}, originalType=${param.originalType}, revised=${param.revised}, original=${param.original}, page=${page - 1})}" aria-label="Previous">
                                 <span aria-hidden="true">&laquo;</span>
                             </a>
                         </li>
-                        <li class="page-item"><a class="page-link" href="#">1</a></li>
-                        <li class="page-item"><a class="page-link" href="#">2</a></li>
-                        <li class="page-item"><a class="page-link" href="#">3</a></li>
-                        <li class="page-item">
-                            <a class="page-link" href="#" aria-label="Next">
+                        <th:block th:each="pageNum : ${#numbers.sequence(0, diff.getTotalPages() - 1)}">
+                            <li class="page-item" th:classappend="${pageNum == page ? 'active' : ''}"><a class="page-link" th:href="@{/view{path}(path=${path}, revisedType=${param.revisedType}, originalType=${param.originalType}, revised=${param.revised}, original=${param.original}, page=${pageNum})}" th:text="${pageNum + 1}">pageNum</a></li>
+                        </th:block>
+                        <li class="page-item" th:classappend="${page + 1 >= diff.getTotalPages() ? 'disabled' : ''}">
+                            <a class="page-link" th:href="@{/view{path}(path=${path}, revisedType=${param.revisedType}, originalType=${param.originalType}, revised=${param.revised}, original=${param.original}, page=${page + 1})}" aria-label="Next">
                                 <span aria-hidden="true">&raquo;</span>
                             </a>
                         </li>

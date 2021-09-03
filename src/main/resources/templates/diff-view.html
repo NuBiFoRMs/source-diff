@@ -16,7 +16,7 @@
         <div class="d-flex mt-3" style="width: 100%; overflow-x: hidden">
             <div>
                 <table class="mx-2 diffTable">
-                    <th:block th:each="row : ${diff}">
+                    <th:block th:each="row : ${diff.toList()}">
                         <tr class="source d-flex justify-content-end"
                             th:id="${row.line}" th:if="${row.visible}">
                             <td class="text-muted" th:text="${row.newLine}">row.newLine</td>
@@ -27,7 +27,7 @@
 
             <div style="width: 100%; overflow-x: auto">
                 <table class="diffTable" style="width: 100%">
-                    <th:block th:each="row : ${diff}">
+                    <th:block th:each="row : ${diff.toList()}">
                         <tr class="source"
                             th:id="${row.line}" th:if="${row.visible}"
                             th:classappend="${row.changeType.equals('C') ? 'trCreate' : row.changeType.equals('U') ? 'trUpdate' : row.changeType.equals('D') ? 'trDelete' : row.changeType.equals('S') ? 'trSkip text-muted' : ''}">
@@ -41,7 +41,7 @@
         <div class="d-flex mt-3" style="width: 100%; overflow-x: hidden">
             <div>
                 <table class="mx-2 diffTable">
-                    <th:block th:each="row : ${diff}">
+                    <th:block th:each="row : ${diff.toList()}">
                         <tr class="source d-flex justify-content-end"
                             th:id="${row.line}" th:if="${row.visible}">
                             <td class="text-muted" th:text="${row.oldLine}">row.oldLine</td>
@@ -52,7 +52,7 @@
 
             <div style="width: 100%; overflow-x: auto">
                 <table class="diffTable" style="width: 100%">
-                    <th:block th:each="row : ${diff}">
+                    <th:block th:each="row : ${diff.toList()}">
                         <tr class="source"
                             th:id="${row.line}" th:if="${row.visible}"
                             th:classappend="${row.changeType.equals('C') ? 'trCreate' : row.changeType.equals('U') ? 'trUpdate' : row.changeType.equals('D') ? 'trDelete' : row.changeType.equals('S') ? 'trSkip text-muted' : ''}">

@@ -17,7 +17,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -131,24 +134,28 @@ public class DiffController {
                        @RequestParam(required = false) Long revised,
                        @RequestParam(required = false) SourceType originalType,
                        @RequestParam(required = false) Long original,
+                       @PageableDefault(size = 50) Pageable pageable,
                        Model model, HttpServletRequest request,
                        RedirectAttributes redirectAttributes) throws IOException {
         String path = PathUtils.removePrefix(request.getRequestURI(), VIEW_URI);
-        log.info("request: {}, repository: {}, path: {}, revisedType: {}, revised: {}, originalType: {}, original: {}", VIEW_URI, repository, path, revisedType, revised, originalType, original);
+        log.info("request: {}, repository: {}, path: {}, revisedType: {}, revised: {}, originalType: {}, original: {}, pageable: {}", VIEW_URI, repository, path, revisedType, revised, originalType, original, pageable);
 
         if (Objects.isNull(revisedType) || Objects.isNull(originalType)) {
             redirectAttributes.addAttribute("revisedType", SourceType.DEV);
             redirectAttributes.addAttribute("originalType", SourceType.PROD);
             redirectAttributes.addAttribute("revised", historyService.getLastRevision(path, SourceType.DEV));
             redirectAttributes.addAttribute("original", historyService.getLastRevision(path, SourceType.PROD));
+            redirectAttributes.addAttribute("page", pageable.getPageNumber());
             return "redirect:" + VIEW_URI + path;
         }
+
 
         if (Objects.isNull(revised) || Objects.isNull(original)) {
             redirectAttributes.addAttribute("revisedType", revisedType);
             redirectAttributes.addAttribute("originalType", originalType);
             redirectAttributes.addAttribute("revised", Objects.isNull(revised) ? historyService.getLastRevision(path, revisedType) : revised);
             redirectAttributes.addAttribute("original", Objects.isNull(original) ? historyService.getLastRevision(path, originalType) : original);
+            redirectAttributes.addAttribute("page", pageable.getPageNumber());
             return "redirect:" + VIEW_URI + path;
         }
 
@@ -157,6 +164,7 @@ public class DiffController {
             redirectAttributes.addAttribute("originalType", originalType);
             redirectAttributes.addAttribute("revised", historyService.getLastRevision(path, revisedType));
             redirectAttributes.addAttribute("original", original);
+            redirectAttributes.addAttribute("page", pageable.getPageNumber());
             return "redirect:" + VIEW_URI + path;
         }
 
@@ -165,6 +173,7 @@ public class DiffController {
             redirectAttributes.addAttribute("originalType", originalType);
             redirectAttributes.addAttribute("revised", revised);
             redirectAttributes.addAttribute("original", historyService.getLastRevision(path, originalType));
+            redirectAttributes.addAttribute("page", pageable.getPageNumber());
             return "redirect:" + VIEW_URI + path;
         }
 
@@ -191,19 +200,34 @@ public class DiffController {
         model.addAttribute("revisedRevision", revisedRevision);
         model.addAttribute("originalRevision", originalRevision);
         model.addAttribute("mode", revisedType.equals(originalType) ? SourceType.DEV.equals(revisedType) ? SourceType.DEV.name() : SourceType.PROD.name() : "DEFAULT");
+        model.addAttribute("page", pageable.getPageNumber());
 
         List<DiffResponse> diffResponseList = diffService.getDiff(path, revisedType, revised, originalType, original);
 
         if (diffResponseList.stream()
                 .anyMatch(diffResponse -> !DiffType.EQUAL.equals(diffResponse.getChangeType()) && !DiffType.SKIP.equals(diffResponse.getChangeType()))) {
             diffResponseList = diffService.setDiffView(diffResponseList);
-            model.addAttribute("diffList", diffService.getDiffList(diffResponseList));
-            model.addAttribute("diff", diffResponseList);
+            PageImpl<DiffResponse> pageableList = getPageableList(pageable, diffResponseList);
+            diffResponseList = pageableList.toList();
+            log.info("pageableList: {}, {}", pageableList.getPageable().getPageNumber(), pageableList.getTotalPages());
+
+            model.addAttribute("diffList", diffService.getDiffList(pageableList.toList()));
+            model.addAttribute("diff", pageableList);
             return "diff-view";
         } else {
-            model.addAttribute("diff", diffResponseList);
+            PageImpl<DiffResponse> pageableList = getPageableList(pageable, diffResponseList);
+            diffResponseList = pageableList.toList();
+            log.info("pageableList: {}, {}", pageableList.getPageable().getPageNumber(), pageableList.getTotalPages());
+
+            model.addAttribute("diff", pageableList);
             return "view";
         }
+    }
+
+    private <T> PageImpl<T> getPageableList(Pageable pageable, List<T> list) {
+        int start = (int) pageable.getOffset();
+        int end = Math.min(start + pageable.getPageSize(), list.size());
+        return new PageImpl<>(list.subList(start, end), pageable, list.size());
     }
 
     private Long getNewRevised(List<SvnInfoResponse> revisionList, Long revision) {

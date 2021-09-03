@@ -1,4 +1,9 @@
 spring:
+  data:
+    web:
+      pageable:
+        max-page-size: 10000
+
   devtools:
     add-properties: false
 
