@@ -7,6 +7,7 @@ import com.nubiform.sourcediff.repository.FileEntity;
 import com.nubiform.sourcediff.repository.FileRepository;
 import com.nubiform.sourcediff.repository.SvnLogRepository;
 import com.nubiform.sourcediff.svn.SvnConnector;
+import com.nubiform.sourcediff.svn.SvnException;
 import com.nubiform.sourcediff.util.PathUtils;
 import com.nubiform.sourcediff.vo.SvnInfoResponse;
 import lombok.RequiredArgsConstructor;
@@ -60,7 +61,11 @@ public class HistoryService {
         String username = repository.getUsername(sourceType);
         String password = repository.getPassword(sourceType);
 
-        svnConnector.export(url + path, revision, location.getParentFile(), username, password);
+        try {
+            svnConnector.export(url + path, revision, location.getParentFile(), username, password);
+        } catch (SvnException e) {
+            return null;
+        }
 
         return FileUtils.readLines(location, StandardCharsets.UTF_8);
     }
