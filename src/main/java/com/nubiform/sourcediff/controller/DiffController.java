@@ -207,16 +207,14 @@ public class DiffController {
                 .anyMatch(diffResponse -> !DiffType.EQUAL.equals(diffResponse.getChangeType()) && !DiffType.SKIP.equals(diffResponse.getChangeType()))) {
             diffResponseList = diffService.setDiffView(diffResponseList);
             PageImpl<DiffResponse> pageableList = getPageableList(pageable, diffResponseList);
-            diffResponseList = pageableList.toList();
-            log.info("pageableList: {}, {}", pageableList.getPageable().getPageNumber(), pageableList.getTotalPages());
+            log.debug("pageableList: {}, {}, {}", pageableList.getPageable().getPageNumber(), pageableList.getPageable().getPageSize(), pageableList.getTotalPages());
 
             model.addAttribute("diffList", diffService.getDiffList(pageableList.toList()));
             model.addAttribute("diff", pageableList);
             return "diff-view";
         } else {
             PageImpl<DiffResponse> pageableList = getPageableList(pageable, diffResponseList);
-            diffResponseList = pageableList.toList();
-            log.info("pageableList: {}, {}", pageableList.getPageable().getPageNumber(), pageableList.getTotalPages());
+            log.debug("pageableList: {}, {}, {}", pageableList.getPageable().getPageNumber(), pageableList.getPageable().getPageSize(), pageableList.getTotalPages());
 
             model.addAttribute("diff", pageableList);
             return "view";
