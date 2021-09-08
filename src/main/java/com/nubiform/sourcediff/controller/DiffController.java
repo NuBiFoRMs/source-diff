@@ -153,13 +153,19 @@ public class DiffController {
         if (Objects.isNull(revised) || Objects.isNull(original)) {
             redirectAttributes.addAttribute("revisedType", revisedType);
             redirectAttributes.addAttribute("originalType", originalType);
-            redirectAttributes.addAttribute("revised", Objects.isNull(revised) ? historyService.getLastRevision(path, revisedType) : revised);
-            redirectAttributes.addAttribute("original", Objects.isNull(original) ? historyService.getLastRevision(path, originalType) : original);
+
+            if (revisedType.equals(originalType)) {
+                redirectAttributes.addAttribute("revised", Objects.isNull(revised) ? historyService.getLastRevision(path, revisedType) : revised);
+                redirectAttributes.addAttribute("original", Objects.isNull(original) ? historyService.getLastRevision(path, revisedType) - 1 : original);
+            } else {
+                redirectAttributes.addAttribute("revised", Objects.isNull(revised) ? historyService.getLastRevision(path, revisedType) : revised);
+                redirectAttributes.addAttribute("original", Objects.isNull(original) ? historyService.getLastRevision(path, originalType) : original);
+            }
             redirectAttributes.addAttribute("page", pageable.getPageNumber());
             return "redirect:" + VIEW_URI + path;
         }
 
-        if (revised == -1 && !revised.equals(historyService.getLastRevision(path, revisedType))) {
+        if (revised <= -1 && !revised.equals(historyService.getLastRevision(path, revisedType))) {
             redirectAttributes.addAttribute("revisedType", revisedType);
             redirectAttributes.addAttribute("originalType", originalType);
             redirectAttributes.addAttribute("revised", historyService.getLastRevision(path, revisedType));
