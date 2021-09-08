@@ -1,8 +1,13 @@
+server:
+  compression:
+    enabled: true
+
 spring:
   data:
     web:
       pageable:
-        max-page-size: 10000
+        default-page-size: 2000
+        max-page-size: 5000
 
   devtools:
     add-properties: false
@@ -11,6 +16,11 @@ spring:
     hibernate:
       ddl-auto: update
     open-in-view: false
+
+  web:
+    resources:
+      cache:
+        period: 86400
 
 springdoc.swagger-ui.path: /swagger-ui.html
 

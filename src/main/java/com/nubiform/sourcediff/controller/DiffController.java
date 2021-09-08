@@ -20,7 +20,6 @@ import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.web.PageableDefault;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -134,7 +133,7 @@ public class DiffController {
                        @RequestParam(required = false) Long revised,
                        @RequestParam(required = false) SourceType originalType,
                        @RequestParam(required = false) Long original,
-                       @PageableDefault(size = 50) Pageable pageable,
+                       Pageable pageable,
                        Model model, HttpServletRequest request,
                        RedirectAttributes redirectAttributes) throws IOException {
         String path = PathUtils.removePrefix(request.getRequestURI(), VIEW_URI);
@@ -214,16 +213,14 @@ public class DiffController {
                 .anyMatch(diffResponse -> !DiffType.EQUAL.equals(diffResponse.getChangeType()) && !DiffType.SKIP.equals(diffResponse.getChangeType()))) {
             diffResponseList = diffService.setDiffView(diffResponseList);
             PageImpl<DiffResponse> pageableList = getPageableList(pageable, diffResponseList);
-            diffResponseList = pageableList.toList();
-            log.info("pageableList: {}, {}", pageableList.getPageable().getPageNumber(), pageableList.getTotalPages());
+            log.debug("pageableList: {}, {}, {}", pageableList.getPageable().getPageNumber(), pageableList.getPageable().getPageSize(), pageableList.getTotalPages());
 
             model.addAttribute("diffList", diffService.getDiffList(pageableList.toList()));
             model.addAttribute("diff", pageableList);
             return "diff-view";
         } else {
             PageImpl<DiffResponse> pageableList = getPageableList(pageable, diffResponseList);
-            diffResponseList = pageableList.toList();
-            log.info("pageableList: {}, {}", pageableList.getPageable().getPageNumber(), pageableList.getTotalPages());
+            log.debug("pageableList: {}, {}, {}", pageableList.getPageable().getPageNumber(), pageableList.getPageable().getPageSize(), pageableList.getTotalPages());
 
             model.addAttribute("diff", pageableList);
             return "view";
