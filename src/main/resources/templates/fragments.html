@@ -103,19 +103,6 @@
                 <div class="d-flex align-items-center justify-content-between">
                     <div class="d-flex align-items-center justify-content-between" style="width: 100%">
                         <div class="input-group input-group-sm me-2">
-                            <span class="input-group-text" th:text="${revisedType.value}">revisedType.value</span>
-                            <select class="form-select form-select-sm" name="revised" th:if="${revisedRevision.size() == 0}">
-                                <option value="">NONE</option>
-                            </select>
-                            <select class="form-select form-select-sm" name="revised" th:if="${revisedRevision.size() > 0}">
-                                <th:block th:each="info : ${revisedRevision}">
-                                    <option th:value="${info.revision}" th:text="${info.getSvnInfo()}" th:selected="${info.revision == revised}">info</option>
-                                </th:block>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="d-flex align-items-center justify-content-between" style="width: 100%">
-                        <div class="input-group input-group-sm me-2">
                             <span class="input-group-text" th:text="${originalType.value}">Prod</span>
                             <select class="form-select form-select-sm" name="original" th:if="${originalRevision.size() == 0}">
                                 <option value="">NONE</option>
@@ -123,6 +110,22 @@
                             <select class="form-select form-select-sm" name="original" th:if="${originalRevision.size() > 0}">
                                 <th:block th:each="info : ${originalRevision}">
                                     <option th:value="${info.revision}" th:text="${info.getSvnInfo()}" th:selected="${info.revision == original}">info</option>
+                                </th:block>
+                            </select>
+                        </div>
+                    </div>
+                    <div>
+                        <a class="btn btn-outline-success btn-sm me-2" th:href="@{/view{path}(path=${path}, revisedType=${param.originalType}, originalType=${param.revisedType}, revised=${param.original}, original=${param.revised}, page=${param.page})}"><i class="fas fa-sync"></i></a>
+                    </div>
+                    <div class="d-flex align-items-center justify-content-between" style="width: 100%">
+                        <div class="input-group input-group-sm me-2">
+                            <span class="input-group-text" th:text="${revisedType.value}">revisedType.value</span>
+                            <select class="form-select form-select-sm" name="revised" th:if="${revisedRevision.size() == 0}">
+                                <option value="">NONE</option>
+                            </select>
+                            <select class="form-select form-select-sm" name="revised" th:if="${revisedRevision.size() > 0}">
+                                <th:block th:each="info : ${revisedRevision}">
+                                    <option th:value="${info.revision}" th:text="${info.getSvnInfo()}" th:selected="${info.revision == revised}">info</option>
                                 </th:block>
                             </select>
                         </div>
