@@ -10,7 +10,7 @@
     </parent>
     <groupId>com.nubiform</groupId>
     <artifactId>source-diff</artifactId>
-    <version>1.0.0</version>
+    <version>1.1.0</version>
     <name>source-diff</name>
     <description>Source Diff.</description>
     <properties>
