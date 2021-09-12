@@ -10,7 +10,7 @@
     </parent>
     <groupId>com.nubiform</groupId>
     <artifactId>source-diff</artifactId>
-    <version>1.0.0</version>
+    <version>1.1.0</version>
     <name>source-diff</name>
     <description>Source Diff.</description>
     <properties>
@@ -89,6 +89,16 @@
             <groupId>org.modelmapper</groupId>
             <artifactId>modelmapper</artifactId>
             <version>2.4.4</version>
+        </dependency>
+        <dependency>
+            <groupId>org.tmatesoft.svnkit</groupId>
+            <artifactId>svnkit</artifactId>
+            <version>1.10.3</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springdoc</groupId>
+            <artifactId>springdoc-openapi-ui</artifactId>
+            <version>1.5.10</version>
         </dependency>
     </dependencies>
 

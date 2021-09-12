@@ -38,7 +38,7 @@
 }
 
 .trCreate {
-    background-color: lightpink;
+    background-color: linen;
 }
 
 .trUpdate {
@@ -46,11 +46,12 @@
 }
 
 .trDelete {
-    background-color: linen;
+    background-color: lightpink;
 }
 
-.skip {
-    height: 100px;
+.trSkip {
+    background-color: aliceblue;
+    height: 50px;
 }
 
 .source {

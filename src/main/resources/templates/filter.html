@@ -14,15 +14,15 @@
             <div class="list-group-item">
                 <div class="d-flex align-items-center justify-content-between">
                     <h5 class="mt-2">
-                        <div th:each="eachPath : ${parentPath}" th:remove="tag">
-                            <div th:if="${!path.equals(eachPath.filePath)}" th:remove="tag">
+                        <th:block th:each="eachPath : ${parentPath}">
+                            <th:block th:if="${!path.equals(eachPath.filePath)}">
                                 <a th:href="@{/filter{path}(path=${eachPath.filePath}, search=${search}, diff=${diffCheck}, dev=${devCheck}, prod=${prodCheck})}">
-                                    <div th:text="${eachPath.fileName}" th:remove="tag">eachPath.fileName</div></a> /
-                            </div>
-                            <div th:if="${path.equals(eachPath.filePath)}" th:remove="tag">
-                                <div th:text="${eachPath.fileName}" th:remove="tag">eachPath.fileName</div></a> /
-                            </div>
-                        </div>
+                                    <th:block th:text="${eachPath.fileName}">eachPath.fileName</th:block></a> /
+                            </th:block>
+                            <th:block th:if="${path.equals(eachPath.filePath)}">
+                                <th:block th:text="${eachPath.fileName}">eachPath.fileName</th:block></a> /
+                            </th:block>
+                        </th:block>
                     </h5>
                     <div class="d-flex align-items-center">
                         <span class="badge rounded-pill bg-warning text-dark me-1" th:if="${diffCheck}">Diff.</span>
@@ -36,14 +36,14 @@
                 </div>
             </div>
 
-            <div th:if="${parent != null}" th:remove="tag">
+            <th:block th:if="${parent != null}">
                 <a class="list-group-item list-group-item-action" th:href="@{/filter{path}(path=${parent.filePath}, search=${search}, diff=${diffCheck}, dev=${devCheck}, prod=${prodCheck})}">
                     <h5 class="mt-2">..</h5>
                 </a>
-            </div>
+            </th:block>
 
-            <div th:each="file : ${files}" th:remove="tag">
-                <div th:if="${#strings.equals(file.fileType, 'D')}" th:remove="tag">
+            <th:block th:each="file : ${files}">
+                <th:block th:if="${#strings.equals(file.fileType, 'D')}">
                     <a class="list-group-item list-group-item-action" th:href="@{/filter{path}(path=${file.filePath}, search=${search}, diff=${diffCheck}, dev=${devCheck}, prod=${prodCheck})}">
                         <div class="d-flex align-items-center justify-content-between">
                             <div class="d-flex align-items-center">
@@ -53,21 +53,21 @@
                                 <h5 class="mt-2" th:utext="${file.filePathDisplay}">file.filePathDisplay</h5>
                             </div>
                             <div>
-                                <div th:if="${file.isDevOnly()}" th:remove="tag">
+                                <th:block th:if="${file.isDevOnly()}">
                                     <span class="badge rounded-pill bg-success">Dev</span>
-                                </div>
-                                <div th:if="${file.isProdOnly()}" th:remove="tag">
+                                </th:block>
+                                <th:block th:if="${file.isProdOnly()}">
                                     <span class="badge rounded-pill bg-secondary">Prod</span>
-                                </div>
-                                <div th:if="${file.diffCount > 0}" th:remove="tag">
+                                </th:block>
+                                <th:block th:if="${file.diffCount > 0}">
                                     <span class="badge rounded-pill bg-primary" th:text="${file.diffCount}">file.diffCount</span>
-                                </div>
+                                </th:block>
                             </div>
                         </div>
                     </a>
-                </div>
+                </th:block>
 
-                <div th:if="${#strings.equals(file.fileType, 'F')}" th:remove="tag">
+                <th:block th:if="${#strings.equals(file.fileType, 'F')}">
                     <a class="list-group-item list-group-item-action" th:href="@{/view{path}(path=${file.filePath})}">
                         <div class="d-flex align-items-center justify-content-between">
                             <div class="d-flex align-items-center">
@@ -77,20 +77,20 @@
                                 <h5 class="mt-2" th:utext="${file.filePathDisplay}">file.filePathDisplay</h5>
                             </div>
                             <div>
-                                <div th:if="${file.isDevOnly()}" th:remove="tag">
+                                <th:block th:if="${file.isDevOnly()}">
                                     <span class="badge rounded-pill bg-success">Dev</span>
-                                </div>
-                                <div th:if="${file.isProdOnly()}" th:remove="tag">
+                                </th:block>
+                                <th:block th:if="${file.isProdOnly()}">
                                     <span class="badge rounded-pill bg-secondary">Prod</span>
-                                </div>
-                                <div th:if="${file.diffCount > 0}" th:remove="tag">
+                                </th:block>
+                                <th:block th:if="${file.diffCount > 0}">
                                     <span class="badge rounded-pill bg-warning text-dark" th:text="${file.diffCount}">file.diffCount</span>
-                                </div>
+                                </th:block>
                             </div>
                         </div>
                     </a>
-                </div>
-            </div>
+                </th:block>
+            </th:block>
 
         </ul>
     </div>

@@ -5,6 +5,7 @@ import com.github.difflib.text.DiffRowGenerator;
 import com.nubiform.sourcediff.config.AppProperties;
 import com.nubiform.sourcediff.constant.DiffType;
 import com.nubiform.sourcediff.constant.FileType;
+import com.nubiform.sourcediff.constant.SourceType;
 import com.nubiform.sourcediff.repository.FileEntity;
 import com.nubiform.sourcediff.repository.FileRepository;
 import com.nubiform.sourcediff.vo.DiffResponse;
@@ -16,7 +17,6 @@ import org.springframework.stereotype.Service;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -28,33 +28,47 @@ public class DiffService {
 
     private final AppProperties appProperties;
 
+    private final HistoryService historyService;
+
     private final FileRepository fileRepository;
 
-    public List<DiffResponse> diff(String path) throws IOException {
+    public List<DiffResponse> getDiff(String path, SourceType revisedType, Long revised, SourceType originalType, Long original) throws IOException {
         FileEntity fileEntity = fileRepository.findByFilePathAndFileType(path, FileType.FILE)
                 .orElseThrow(RuntimeException::new);
 
-        List<String> devSource;
-        List<String> prodSource;
+        List<String> revisedSource = null;
+        List<String> originalSource = null;
 
-        if (Objects.nonNull(fileEntity.getDevFilePath()) && Objects.nonNull(fileEntity.getProdFilePath())) {
-            devSource = FileUtils.readLines(new File(fileEntity.getDevFilePath()), StandardCharsets.UTF_8);
-            prodSource = FileUtils.readLines(new File(fileEntity.getProdFilePath()), StandardCharsets.UTF_8);
-        } else if (Objects.nonNull(fileEntity.getDevFilePath()) && Objects.isNull(fileEntity.getProdFilePath())) {
-            devSource = FileUtils.readLines(new File(fileEntity.getDevFilePath()), StandardCharsets.UTF_8);
-            prodSource = devSource;
-        } else if (Objects.isNull(fileEntity.getDevFilePath()) && Objects.nonNull(fileEntity.getProdFilePath())) {
-            prodSource = FileUtils.readLines(new File(fileEntity.getProdFilePath()), StandardCharsets.UTF_8);
-            devSource = prodSource;
-        } else throw new RemoteException();
+        if (revised >= 0 && fileEntity.getRevision(revisedType) > revised) {
+            revisedSource = historyService.exportFile(path, revisedType, String.valueOf(revised));
+        } else if (Objects.nonNull(fileEntity.getFilePath(revisedType))) {
+            revisedSource = FileUtils.readLines(new File(fileEntity.getFilePath(revisedType)), StandardCharsets.UTF_8);
+        }
 
+        if (original >= 0 && fileEntity.getRevision(originalType) > original) {
+            originalSource = historyService.exportFile(path, originalType, String.valueOf(original));
+        } else if (Objects.nonNull(fileEntity.getFilePath(originalType))) {
+            originalSource = FileUtils.readLines(new File(fileEntity.getFilePath(originalType)), StandardCharsets.UTF_8);
+        }
+
+        if (Objects.isNull(revisedSource) && Objects.isNull(originalSource))
+            throw new RuntimeException();
+        else if (Objects.nonNull(revisedSource) && Objects.isNull(originalSource))
+            originalSource = revisedSource;
+        else if (Objects.isNull(revisedSource) && Objects.nonNull(originalSource))
+            revisedSource = originalSource;
+
+        return getDiff(revisedSource, originalSource);
+    }
+
+    public List<DiffResponse> getDiff(List<String> revisedSource, List<String> originalSource) {
         DiffRowGenerator diffRowGenerator = DiffRowGenerator.create()
                 .inlineDiffByWord(true)
                 .showInlineDiffs(true)
                 .ignoreWhiteSpaces(true)
                 .build();
 
-        List<DiffRow> diffRows = diffRowGenerator.generateDiffRows(prodSource, devSource);
+        List<DiffRow> diffRows = diffRowGenerator.generateDiffRows(originalSource, revisedSource);
         List<DiffResponse> diffResponseList = new ArrayList<>(diffRows.size());
 
         int line = 1;
@@ -91,6 +105,10 @@ public class DiffService {
             diffResponseList.add(diffResponse);
         }
 
+        return diffResponseList;
+    }
+
+    public List<DiffResponse> setDiffView(List<DiffResponse> diffResponseList) {
         return setSkip(setVisible(diffResponseList));
     }
 
@@ -125,19 +143,67 @@ public class DiffService {
     }
 
     private List<DiffResponse> setSkip(List<DiffResponse> diffResponseList) {
+        int keyLine = 1;
+        int line = Integer.MAX_VALUE;
+        int oldLine = Integer.MAX_VALUE;
+        int newLine = Integer.MAX_VALUE;
+
+        List<DiffResponse> result = new ArrayList<>();
+        for (int i = 0; i < diffResponseList.size(); i++) {
+            DiffResponse diffResponse = diffResponseList.get(i);
+
+            if (diffResponse.isVisible()) {
+                if (line < Integer.MAX_VALUE) {
+                    DiffResponse skipResponse = new DiffResponse();
+                    skipResponse.setChangeType(DiffType.SKIP);
+                    skipResponse.setLine(keyLine++);
+                    skipResponse.setOldSource(String.format("[%d - %d]", oldLine, diffResponse.getOldLine() - 1));
+                    skipResponse.setNewSource(String.format("[%d - %d]", newLine, diffResponse.getNewLine() - 1));
+                    skipResponse.setVisible(true);
+                    result.add(skipResponse);
+                }
+
+                diffResponse.setLine(keyLine++);
+                result.add(diffResponse);
+
+                line = Integer.MAX_VALUE;
+                oldLine = Integer.MAX_VALUE;
+                newLine = Integer.MAX_VALUE;
+            } else {
+                line = Math.min(diffResponse.getLine(), line);
+                oldLine = Math.min(diffResponse.getOldLine(), oldLine);
+                newLine = Math.min(diffResponse.getNewLine(), newLine);
+            }
+        }
+
+        if (line < Integer.MAX_VALUE) {
+            DiffResponse skipResponse = new DiffResponse();
+            skipResponse.setChangeType(DiffType.SKIP);
+            skipResponse.setOldSource(String.format("[%d - %d]", oldLine, diffResponseList.get(diffResponseList.size() - 1).getOldLine() - 1));
+            skipResponse.setNewSource(String.format("[%d - %d]", newLine, diffResponseList.get(diffResponseList.size() - 1).getNewLine() - 1));
+            skipResponse.setVisible(true);
+            result.add(skipResponse);
+        }
+
+        return result;
+    }
+
+    public List<Integer> getDiffList(List<DiffResponse> diffResponseList) {
+        List<Integer> result = new ArrayList<>();
         for (int i = 0; i < diffResponseList.size() - 1; i++) {
             DiffResponse current = diffResponseList.get(i);
             DiffResponse next = diffResponseList.get(i + 1);
 
-            if (current.isVisible() != next.isVisible()) {
-                if (current.isVisible()) {
-                    next.setSkip(true);
-                } else {
-                    current.setSkip(true);
-                }
+            if (i == 0 &&
+                    !DiffType.EQUAL.equals(current.getChangeType()) && !DiffType.SKIP.equals(current.getChangeType())) {
+                result.add(current.getLine());
+            }
+
+            if (current.getChangeType() != next.getChangeType() &&
+                    (!DiffType.EQUAL.equals(next.getChangeType()) && !DiffType.SKIP.equals(next.getChangeType()))) {
+                result.add(next.getLine());
             }
         }
-
-        return diffResponseList;
+        return result;
     }
 }

@@ -35,9 +35,9 @@
                         Repositories
                     </a>
                     <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-                        <div th:each="repository : ${repositories}" th:remove="tag">
+                        <th:block th:each="repository : ${repositories}">
                             <li><a class="dropdown-item" th:href="@{/explorer/{path}(path=${repository.name})}" th:text="${repository.name}">repository.name</a></li>
-                        </div>
+                        </th:block>
                     </ul>
                 </li>
             </ul>
@@ -60,5 +60,119 @@
         <p class="text-center text-muted">&copy; 2021 NuBiFoRM's Studio</p>
     </footer>
 </div>
+
+<th:block th:fragment="diff-header">
+    <div class="list-group fixed-top" style="background-color: white">
+        <div class="mx-2 mt-2 list-group-item">
+            <div class="d-flex align-items-center justify-content-between">
+                <div>
+                    <th:block th:each="path : ${parentPath}">
+                        <th:block th:if="${path.fileType.equals('D')}">
+                            <a th:href="@{/explorer{path}(path=${path.filePath})}">
+                                <th:block th:text="${path.fileName}">path.fileName</th:block></a> /
+                        </th:block>
+                        <th:block th:if="${path.fileType.equals('F')}">
+                            <th:block th:text="${path.fileName}">path.fileName</th:block>
+                        </th:block>
+                    </th:block>
+                </div>
+                <div class="d-flex justify-content-between">
+                    <form>
+                        <input type="hidden" name="revisedType" th:value="DEV"/>
+                        <input type="hidden" name="originalType" th:value="PROD"/>
+                        <button class="btn btn-sm me-2" th:classappend="${mode.equals('DEFAULT') ? 'btn-warning' : 'btn-outline-warning'}" type="submit">Default</button>
+                    </form>
+                    <form>
+                        <input type="hidden" name="revisedType" th:value="DEV"/>
+                        <input type="hidden" name="originalType" th:value="DEV"/>
+                        <button class="btn btn-sm me-2" th:classappend="${mode.equals('DEV') ? 'btn-success' : 'btn-outline-success'}" type="submit">Dev</button>
+                    </form>
+                    <form>
+                        <input type="hidden" name="revisedType" th:value="PROD"/>
+                        <input type="hidden" name="originalType" th:value="PROD"/>
+                        <button class="btn btn-sm" th:classappend="${mode.equals('PROD') ? 'btn-secondary' : 'btn-outline-secondary'}" type="submit">Prod</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="mx-2 list-group-item">
+            <form>
+                <input type="hidden" name="revisedType" th:value="${revisedType}"/>
+                <input type="hidden" name="originalType" th:value="${originalType}"/>
+                <div class="d-flex align-items-center justify-content-between">
+                    <div class="d-flex align-items-center justify-content-between" style="width: 100%">
+                        <div class="input-group input-group-sm me-2">
+                            <span class="input-group-text" th:text="${originalType.value}">Prod</span>
+                            <select class="form-select form-select-sm" name="original" th:if="${originalRevision.size() == 0}">
+                                <option value="">NONE</option>
+                            </select>
+                            <select class="form-select form-select-sm" name="original" th:if="${originalRevision.size() > 0}">
+                                <th:block th:each="info : ${originalRevision}">
+                                    <option th:value="${info.revision}" th:text="${info.getSvnInfo()}" th:selected="${info.revision == original}">info</option>
+                                </th:block>
+                            </select>
+                        </div>
+                    </div>
+                    <div>
+                        <a class="btn btn-outline-success btn-sm me-2" th:href="@{/view{path}(path=${path}, revisedType=${param.originalType}, originalType=${param.revisedType}, revised=${param.original}, original=${param.revised}, page=${param.page})}"><i class="fas fa-sync"></i></a>
+                    </div>
+                    <div class="d-flex align-items-center justify-content-between" style="width: 100%">
+                        <div class="input-group input-group-sm me-2">
+                            <span class="input-group-text" th:text="${revisedType.value}">revisedType.value</span>
+                            <select class="form-select form-select-sm" name="revised" th:if="${revisedRevision.size() == 0}">
+                                <option value="">NONE</option>
+                            </select>
+                            <select class="form-select form-select-sm" name="revised" th:if="${revisedRevision.size() > 0}">
+                                <th:block th:each="info : ${revisedRevision}">
+                                    <option th:value="${info.revision}" th:text="${info.getSvnInfo()}" th:selected="${info.revision == revised}">info</option>
+                                </th:block>
+                            </select>
+                        </div>
+                        <div>
+                            <button class="btn btn-success btn-sm" type="submit">Compare</button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="mx-2 list-group-item">
+            <div class="d-flex align-items-center justify-content-between">
+                <div>
+                    <div class="pagination pagination-sm">
+                        <li class="page-item">
+                            <a class="page-link" href="#top">Top</a>
+                        </li>
+                        <th:block th:each="line, index : ${diffList}">
+                            <li class="page-item"><a class="page-link" th:href="${'#' + (line - 10 < 0 ? 0 : line - 10)}" th:text="${index.count}">line</a></li>
+                        </th:block>
+                        <li class="page-item">
+                            <a class="page-link" href="#bottom">Bottom</a>
+                        </li>
+                    </div>
+                </div>
+                <div>
+                    <div class="pagination pagination-sm">
+                        <li class="page-item" th:classappend="${page - 1 < 0 ? 'disabled' : ''}">
+                            <a class="page-link" th:href="@{/view{path}(path=${path}, revisedType=${param.revisedType}, originalType=${param.originalType}, revised=${param.revised}, original=${param.original}, page=${page - 1})}" aria-label="Previous">
+                                <span aria-hidden="true">&laquo;</span>
+                            </a>
+                        </li>
+                        <th:block th:each="pageNum : ${#numbers.sequence(0, diff.getTotalPages() - 1)}">
+                            <li class="page-item" th:classappend="${pageNum == page ? 'active' : ''}"><a class="page-link" th:href="@{/view{path}(path=${path}, revisedType=${param.revisedType}, originalType=${param.originalType}, revised=${param.revised}, original=${param.original}, page=${pageNum})}" th:text="${pageNum + 1}">pageNum</a></li>
+                        </th:block>
+                        <li class="page-item" th:classappend="${page + 1 >= diff.getTotalPages() ? 'disabled' : ''}">
+                            <a class="page-link" th:href="@{/view{path}(path=${path}, revisedType=${param.revisedType}, originalType=${param.originalType}, revised=${param.revised}, original=${param.original}, page=${page + 1})}" aria-label="Next">
+                                <span aria-hidden="true">&raquo;</span>
+                            </a>
+                        </li>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="mx-2 list-group-item" style="display: none">
+        </div>
+    </div>
+</th:block>
 
 </html>

@@ -5,4 +5,5 @@ public final class DiffType {
     public static final String UPDATE = "U";
     public static final String DELETE = "D";
     public static final String EQUAL = "E";
+    public static final String SKIP = "S";
 }

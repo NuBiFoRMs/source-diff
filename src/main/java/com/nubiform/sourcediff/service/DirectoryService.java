@@ -26,6 +26,7 @@ public class DirectoryService {
     public List<FileResponse> getRepositories() {
         return fileRepository.findAllByParentIdIsNull()
                 .stream()
+                .sorted(Comparator.comparing(FileEntity::getFilePath))
                 .map(this::map)
                 .collect(Collectors.toList());
     }
