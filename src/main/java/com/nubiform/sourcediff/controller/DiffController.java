@@ -225,6 +225,7 @@ public class DiffController {
             model.addAttribute("diff", pageableList);
             return "view";
         }
+        
     }
 
     private <T> PageImpl<T> getPageableList(Pageable pageable, List<T> list) {
