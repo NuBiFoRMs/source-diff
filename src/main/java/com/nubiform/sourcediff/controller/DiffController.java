@@ -224,7 +224,7 @@ public class DiffController {
 
             model.addAttribute("diff", pageableList);
             return "view";
-            
+
         }
 
 
@@ -289,4 +289,5 @@ public class DiffController {
 
         return "mail";
     }
+    
 }
