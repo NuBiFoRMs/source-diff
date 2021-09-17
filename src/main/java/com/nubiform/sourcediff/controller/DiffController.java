@@ -269,6 +269,7 @@ public class DiffController {
         return "mail-success";
     }
 
+    
     @GetMapping(MAILING_TEST_URI + REPOSITORY_PATH)
     public String mailingTest(@PathVariable String repository, Model model) {
         log.info("request: {}, repository: {}", MAILING_TEST_URI, repository);
@@ -289,5 +290,5 @@ public class DiffController {
 
         return "mail";
     }
-    
+
 }
