@@ -127,6 +127,7 @@ public class DiffController {
         return "filter";
     }
 
+    
     @GetMapping(VIEW_URI + REPOSITORY_PATH + ANT_PATTERN)
     public String view(@PathVariable String repository,
                        @RequestParam(required = false) SourceType revisedType,
@@ -269,7 +270,7 @@ public class DiffController {
         return "mail-success";
     }
 
-    
+
     @GetMapping(MAILING_TEST_URI + REPOSITORY_PATH)
     public String mailingTest(@PathVariable String repository, Model model) {
         log.info("request: {}, repository: {}", MAILING_TEST_URI, repository);
