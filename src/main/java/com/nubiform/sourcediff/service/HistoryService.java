@@ -19,7 +19,6 @@ import org.springframework.stereotype.Service;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.rmi.RemoteException;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -52,7 +51,7 @@ public class HistoryService {
         if (!location.getParentFile().exists()) {
             log.info("mkdir: {}", location.getParentFile().getPath());
             if (!location.getParentFile().mkdirs())
-                throw new RemoteException();
+                throw new RuntimeException();
         }
 
         AppProperties.RepositoryProperties repository = appProperties.getRepository(fileEntity.getRepository());
