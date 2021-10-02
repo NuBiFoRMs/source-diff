@@ -1,15 +1,12 @@
 package com.nubiform.sourcediff.controller;
 
 import com.nubiform.sourcediff.config.AppProperties;
-import com.nubiform.sourcediff.repository.FileRepository;
 import com.nubiform.sourcediff.service.DirectoryService;
-import com.nubiform.sourcediff.service.MailService;
 import com.nubiform.sourcediff.util.PathUtils;
 import com.nubiform.sourcediff.vo.FileResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -28,19 +25,12 @@ public class ExplorerController {
     public static final String HOME_URI = "/";
     public static final String EXPLORER_URI = "/explorer";
     public static final String FILTER_URI = "/filter";
-    public static final String MAILING_URI = "/mailing";
     public static final String REPOSITORY_PATH = "/{repository}";
     public static final String ANT_PATTERN = "/**";
-    public static final String MAILING_TEST_URI = "/mailing-test";
 
     private final AppProperties appProperties;
 
     private final DirectoryService directoryService;
-    private final MailService mailService;
-
-    private final FileRepository fileRepository;
-
-    private final ModelMapper modelMapper;
 
     @GetMapping(HOME_URI)
     public String home(Model model) {
