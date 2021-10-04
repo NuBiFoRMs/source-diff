@@ -5,6 +5,7 @@ import com.nubiform.sourcediff.mail.MailMessage;
 import com.nubiform.sourcediff.service.MailService;
 import com.nubiform.sourcediff.service.ScanService;
 import com.nubiform.sourcediff.vo.ApiResponse;
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -57,7 +58,7 @@ public class ApiController {
                         .build());
     }
 
-    @ResponseBody
+    @Operation(hidden = true)
     @PostMapping(MAIL_URI)
     public ResponseEntity<ApiResponse<Object>> mail(@RequestBody MailMessage mailMessage) {
         log.info("request: {}, to: {}, subject: {}", MAIL_URI, mailMessage.getTo(), mailMessage.getSubject());
@@ -69,7 +70,6 @@ public class ApiController {
                         .build());
     }
 
-    @ResponseBody
     @GetMapping(SCAN_URI)
     public ResponseEntity<ApiResponse<Object>> batchScan() {
         log.info("request: {}", SCAN_URI);
@@ -84,7 +84,6 @@ public class ApiController {
                         .build());
     }
 
-    @ResponseBody
     @GetMapping(SCAN_URI + REPOSITORY_PATH)
     public ResponseEntity<ApiResponse<Object>> batchScan(@PathVariable String repository) {
         log.info("request: {}", SCAN_URI);
@@ -101,7 +100,6 @@ public class ApiController {
                         .build());
     }
 
-    @ResponseBody
     @GetMapping(SVN_INFO_SCAN_URI)
     public ResponseEntity<ApiResponse<Object>> batchSvnInfoScan() {
         log.info("request: {}", SVN_INFO_SCAN_URI);
