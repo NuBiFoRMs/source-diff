@@ -49,6 +49,7 @@ public class DiffController {
         String path = PathUtils.removePrefix(request.getRequestURI(), VIEW_URI);
         log.info("request: {}, repository: {}, path: {}, revisedType: {}, revised: {}, originalType: {}, original: {}, pageable: {}", VIEW_URI, repository, path, revisedType, revised, originalType, original, pageable);
 
+        // default type
         if (Objects.isNull(revisedType) || Objects.isNull(originalType)) {
             redirectAttributes.addAttribute("revisedType", SourceType.DEV);
             redirectAttributes.addAttribute("originalType", SourceType.PROD);
@@ -58,7 +59,7 @@ public class DiffController {
             return "redirect:" + VIEW_URI + path;
         }
 
-
+        // default revision
         if (Objects.isNull(revised) || Objects.isNull(original)) {
             redirectAttributes.addAttribute("revisedType", revisedType);
             redirectAttributes.addAttribute("originalType", originalType);
@@ -74,6 +75,7 @@ public class DiffController {
             return "redirect:" + VIEW_URI + path;
         }
 
+        // check revised revision
         if (revised <= -1 && !revised.equals(historyService.getLastRevision(path, revisedType))) {
             redirectAttributes.addAttribute("revisedType", revisedType);
             redirectAttributes.addAttribute("originalType", originalType);
@@ -83,7 +85,8 @@ public class DiffController {
             return "redirect:" + VIEW_URI + path;
         }
 
-        if (original == -1 && !original.equals(historyService.getLastRevision(path, originalType))) {
+        // check original revision
+        if (original <= -1 && !original.equals(historyService.getLastRevision(path, originalType))) {
             redirectAttributes.addAttribute("revisedType", revisedType);
             redirectAttributes.addAttribute("originalType", originalType);
             redirectAttributes.addAttribute("revised", revised);
@@ -134,7 +137,6 @@ public class DiffController {
 
             model.addAttribute("diff", pageableList);
             return "view";
-
         }
     }
 
