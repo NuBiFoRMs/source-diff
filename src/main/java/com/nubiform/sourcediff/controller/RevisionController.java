@@ -3,6 +3,7 @@ package com.nubiform.sourcediff.controller;
 import com.nubiform.sourcediff.config.AppProperties;
 import com.nubiform.sourcediff.constant.SourceType;
 import com.nubiform.sourcediff.repository.SvnLogRepository;
+import com.nubiform.sourcediff.service.HistoryService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
@@ -22,15 +23,16 @@ public class RevisionController {
 
     private final AppProperties appProperties;
 
+    private final HistoryService historyService;
+
     private final SvnLogRepository svnLogRepository;
 
     @GetMapping(REVISION_URI + REPOSITORY_PATH + SOURCE_TYPE_PATH + ANT_PATTERN)
     public String revision(@PathVariable String repository, @PathVariable SourceType sourceType, Model model) {
         log.info("request: {}, repository: {}, sourceType: {}", REVISION_URI, repository, sourceType);
 
-        svnLogRepository.findAllByRepositoryAndSourceType(repository, sourceType.toString());
-
         model.addAttribute("repositories", appProperties.getRepositories());
+        model.addAttribute("svnLogs", historyService.getLogList(repository, sourceType));
 
         return "revision";
     }

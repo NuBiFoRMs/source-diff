@@ -4,5 +4,20 @@
 <body>
 <div th:replace="fragments.html :: nav-main"></div>
 
+<div class="container">
+    <div class="mt-5 mb-5">
+        <ul class="list-group">
+            <th:block th:each="svnLog : ${svnLogs}">
+                <a class="list-group-item list-group-item-action">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <h5 class="mt-2" th:text="${svnLog.getShortMessage()}">svnLog.message</h5>
+                        <h5 class="mt-2" th:text="${svnLog.revision}">svnLog.revision</h5>
+                    </div>
+                </a>
+            </th:block>
+        </ul>
+    </div>
+</div>
+
 </body>
 </html>
