@@ -10,6 +10,7 @@ import com.nubiform.sourcediff.svn.SvnConnector;
 import com.nubiform.sourcediff.svn.SvnException;
 import com.nubiform.sourcediff.util.PathUtils;
 import com.nubiform.sourcediff.vo.SvnInfoResponse;
+import com.nubiform.sourcediff.vo.SvnLogResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
@@ -19,6 +20,7 @@ import org.springframework.stereotype.Service;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -70,12 +72,11 @@ public class HistoryService {
     }
 
     public List<SvnInfoResponse> getRevisionList(String path, SourceType sourceType) {
-        List<SvnInfoResponse> collect = svnLogRepository.findAllRevision(path, sourceType.toString())
+        return svnLogRepository.findAllRevision(path, sourceType.toString())
                 .stream()
                 .limit(20)
                 .map(svnLog -> modelMapper.map(svnLog, SvnInfoResponse.class))
                 .collect(Collectors.toList());
-        return collect;
     }
 
     public Long getLastRevision(String path, SourceType sourceType) {
@@ -83,5 +84,14 @@ public class HistoryService {
                 .filter(fileEntity -> Objects.nonNull(fileEntity.getFilePath(sourceType)))
                 .map(fileEntity -> fileEntity.getRevision(sourceType))
                 .orElse(-1L);
+    }
+
+    public List<SvnLogResponse> getLogList(String repository, SourceType sourceType) {
+        return svnLogRepository.findAllByRepositoryAndSourceType(repository, sourceType.toString())
+                .stream()
+                .map(svnLog -> modelMapper.map(svnLog, SvnLogResponse.class))
+                .distinct()
+                .sorted(Comparator.comparing(SvnLogResponse::getRevision).reversed())
+                .collect(Collectors.toList());
     }
 }
