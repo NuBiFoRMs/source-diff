@@ -100,6 +100,7 @@ public class ApiController {
                         .build());
     }
 
+    @Operation(hidden = true)
     @GetMapping(SVN_INFO_SCAN_URI)
     public ResponseEntity<ApiResponse<Object>> batchSvnInfoScan() {
         log.info("request: {}", SVN_INFO_SCAN_URI);
