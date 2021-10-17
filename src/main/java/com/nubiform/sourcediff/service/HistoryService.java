@@ -10,6 +10,7 @@ import com.nubiform.sourcediff.svn.SvnConnector;
 import com.nubiform.sourcediff.svn.SvnException;
 import com.nubiform.sourcediff.util.PathUtils;
 import com.nubiform.sourcediff.vo.SvnInfoResponse;
+import com.nubiform.sourcediff.vo.SvnLogFileResponse;
 import com.nubiform.sourcediff.vo.SvnLogResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -92,6 +93,14 @@ public class HistoryService {
                 .map(svnLog -> modelMapper.map(svnLog, SvnLogResponse.class))
                 .distinct()
                 .sorted(Comparator.comparing(SvnLogResponse::getRevision).reversed())
+                .collect(Collectors.toList());
+    }
+
+    public List<SvnLogFileResponse> getLogFileList(String repository, SourceType sourceType, Long revision) {
+        return svnLogRepository.findAllByRepositoryAndSourceTypeAndRevision(repository, sourceType.toString(), revision)
+                .stream()
+                .map(svnLog -> modelMapper.map(svnLog, SvnLogFileResponse.class))
+                .sorted(Comparator.comparing(SvnLogFileResponse::getFilePath))
                 .collect(Collectors.toList());
     }
 }
