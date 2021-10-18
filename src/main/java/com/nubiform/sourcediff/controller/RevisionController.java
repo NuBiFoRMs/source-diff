@@ -46,7 +46,8 @@ public class RevisionController {
         log.info("request: {}, repository: {}, sourceType: {}, revision: {}", REVISION_URI, repository, sourceType, revision);
 
         model.addAttribute("repositories", appProperties.getRepositories());
+        model.addAttribute("svnLogFiles", historyService.getLogFileList(repository, sourceType, revision));
 
-        return null;
+        return "revision";
     }
 }
