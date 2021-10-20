@@ -48,6 +48,6 @@ public class RevisionController {
         model.addAttribute("repositories", appProperties.getRepositories());
         model.addAttribute("svnLogFiles", historyService.getLogFileList(repository, sourceType, revision));
 
-        return "revision";
+        return "revision-file";
     }
 }
