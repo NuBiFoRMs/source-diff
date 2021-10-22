@@ -18,4 +18,6 @@ public interface SvnLogRepository extends JpaRepository<SvnLogEntity, Long> {
     List<SvnLogEntity> findAllRevision(String filePath, String sourceType);
 
     List<SvnLogEntity> findAllByRepositoryAndSourceType(String repository, String sourceType);
+
+    List<SvnLogEntity> findAllByRepositoryAndSourceTypeAndRevision(String repository, String sourceType, Long revision);
 }

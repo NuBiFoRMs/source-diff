@@ -19,6 +19,7 @@ public class RevisionController {
     public static final String REVISION_URI = "/revision";
     public static final String REPOSITORY_PATH = "/{repository}";
     public static final String SOURCE_TYPE_PATH = "/{sourceType}";
+    public static final String REVISION_PATH = "/{revision}";
     public static final String ANT_PATTERN = "/**";
 
     private final AppProperties appProperties;
@@ -27,7 +28,7 @@ public class RevisionController {
 
     private final SvnLogRepository svnLogRepository;
 
-    @GetMapping(REVISION_URI + REPOSITORY_PATH + SOURCE_TYPE_PATH + ANT_PATTERN)
+    @GetMapping(REVISION_URI + REPOSITORY_PATH + SOURCE_TYPE_PATH)
     public String revision(@PathVariable String repository, @PathVariable SourceType sourceType, Model model) {
         log.info("request: {}, repository: {}, sourceType: {}", REVISION_URI, repository, sourceType);
 
@@ -35,5 +36,18 @@ public class RevisionController {
         model.addAttribute("svnLogs", historyService.getLogList(repository, sourceType));
 
         return "revision";
+    }
+
+    @GetMapping(REVISION_URI + REPOSITORY_PATH + SOURCE_TYPE_PATH + REVISION_PATH + ANT_PATTERN)
+    public String revision(@PathVariable String repository,
+                           @PathVariable SourceType sourceType,
+                           @PathVariable Long revision,
+                           Model model) {
+        log.info("request: {}, repository: {}, sourceType: {}, revision: {}", REVISION_URI, repository, sourceType, revision);
+
+        model.addAttribute("repositories", appProperties.getRepositories());
+        model.addAttribute("svnLogFiles", historyService.getLogFileList(repository, sourceType, revision));
+
+        return "revision-file";
     }
 }
