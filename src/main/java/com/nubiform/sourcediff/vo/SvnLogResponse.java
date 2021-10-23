@@ -1,17 +1,11 @@
 package com.nubiform.sourcediff.vo;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
 @Data
 public class SvnLogResponse {
 
