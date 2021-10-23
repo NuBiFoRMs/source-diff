@@ -9,7 +9,6 @@ import com.nubiform.sourcediff.repository.SvnLogRepository;
 import com.nubiform.sourcediff.svn.SvnConnector;
 import com.nubiform.sourcediff.svn.SvnException;
 import com.nubiform.sourcediff.util.PathUtils;
-import com.nubiform.sourcediff.vo.SvnInfoResponse;
 import com.nubiform.sourcediff.vo.SvnLogFileResponse;
 import com.nubiform.sourcediff.vo.SvnLogResponse;
 import lombok.RequiredArgsConstructor;
@@ -72,11 +71,11 @@ public class HistoryService {
         return FileUtils.readLines(location, StandardCharsets.UTF_8);
     }
 
-    public List<SvnInfoResponse> getRevisionList(String path, SourceType sourceType) {
+    public List<SvnLogResponse> getRevisionList(String path, SourceType sourceType) {
         return svnLogRepository.findAllRevision(path, sourceType.toString())
                 .stream()
                 .limit(20)
-                .map(svnLog -> modelMapper.map(svnLog, SvnInfoResponse.class))
+                .map(svnLog -> modelMapper.map(svnLog, SvnLogResponse.class))
                 .collect(Collectors.toList());
     }
 
@@ -103,5 +102,5 @@ public class HistoryService {
                 .sorted(Comparator.comparing(SvnLogFileResponse::getFilePath))
                 .collect(Collectors.toList());
     }
-    
+
 }

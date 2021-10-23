@@ -7,7 +7,7 @@ import com.nubiform.sourcediff.service.DirectoryService;
 import com.nubiform.sourcediff.service.HistoryService;
 import com.nubiform.sourcediff.util.PathUtils;
 import com.nubiform.sourcediff.vo.DiffResponse;
-import com.nubiform.sourcediff.vo.SvnInfoResponse;
+import com.nubiform.sourcediff.vo.SvnLogResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageImpl;
@@ -95,8 +95,8 @@ public class DiffController {
             return "redirect:" + VIEW_URI + path;
         }
 
-        List<SvnInfoResponse> revisedRevision = historyService.getRevisionList(path, revisedType);
-        List<SvnInfoResponse> originalRevision = historyService.getRevisionList(path, originalType);
+        List<SvnLogResponse> revisedRevision = historyService.getRevisionList(path, revisedType);
+        List<SvnLogResponse> originalRevision = historyService.getRevisionList(path, originalType);
 
         Long newRevised = getNewRevised(revisedRevision, revised);
         Long newOriginal = getNewRevised(originalRevision, original);
@@ -146,10 +146,10 @@ public class DiffController {
         return new PageImpl<>(list.subList(start, end), pageable, list.size());
     }
 
-    private Long getNewRevised(List<SvnInfoResponse> revisionList, Long revision) {
+    private Long getNewRevised(List<SvnLogResponse> revisionList, Long revision) {
         return revisionList
                 .stream()
-                .map(SvnInfoResponse::getRevision)
+                .map(SvnLogResponse::getRevision)
                 .filter(r -> r <= revision)
                 .findFirst().orElse(-1L);
     }
