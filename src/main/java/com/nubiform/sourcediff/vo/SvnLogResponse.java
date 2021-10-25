@@ -1,20 +1,15 @@
 package com.nubiform.sourcediff.vo;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
 @Data
 public class SvnLogResponse {
 
-    public static final int LENGTH = 50;
+    private static final int LENGTH = 50;
 
     private Long revision;
 
@@ -23,6 +18,14 @@ public class SvnLogResponse {
     private LocalDateTime commitTime;
 
     private String message;
+
+    public String getCommitTime() {
+        return this.commitTime.format(DateTimeFormatter.ISO_DATE);
+    }
+
+    public String getSvnInfo() {
+        return String.format("%d [%s : %s] %s", this.revision, this.getCommitTime(), this.author, this.getShortMessage());
+    }
 
     public String getShortMessage() {
         if (StringUtils.length(this.message) == 0)
